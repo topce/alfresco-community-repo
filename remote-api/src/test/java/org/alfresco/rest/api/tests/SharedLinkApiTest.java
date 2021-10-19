@@ -25,12 +25,15 @@
  */
 package org.alfresco.rest.api.tests;
 
-import org.alfresco.repo.action.ActionServiceImpl;
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.quickshare.QuickShareLinkExpiryActionImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.service.ServiceDescriptorRegistry;
 import org.alfresco.repo.tenant.TenantUtil;
+import org.alfresco.repo.virtual.VirtualContentModel;
+import org.alfresco.repo.virtual.ref.Reference;
+import org.alfresco.repo.virtual.store.VirtualStore;
 import org.alfresco.rest.api.People;
 import org.alfresco.rest.api.QuickShareLinks;
 import org.alfresco.rest.api.impl.QuickShareLinksImpl;
@@ -54,18 +57,25 @@ import org.alfresco.rest.api.tests.client.data.QuickShareLinkEmailRequest;
 import org.alfresco.rest.api.tests.client.data.Rendition;
 import org.alfresco.rest.api.tests.client.data.UserInfo;
 import org.alfresco.rest.api.tests.util.MultiPartBuilder;
+import org.alfresco.rest.api.tests.util.MultiPartBuilder.FileData;
+import org.alfresco.rest.api.tests.util.MultiPartBuilder.MultiPartRequest;
 import org.alfresco.rest.api.tests.util.RestApiUtil;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.scheduled.ScheduledPersistedActionService;
+import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.quickshare.QuickShareLinkExpiryAction;
 import org.alfresco.service.cmr.quickshare.QuickShareLinkExpiryActionPersister;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteVisibility;
-import org.alfresco.util.testing.category.FrequentlyFailingTests;
+import org.alfresco.service.namespace.QName;
+import org.alfresco.service.transaction.TransactionService;
 import org.alfresco.util.testing.category.LuceneTests;
 import org.alfresco.util.testing.category.RedundantTests;
 import org.joda.time.DateTime;
@@ -74,6 +84,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import java.io.File;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -87,7 +98,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 
+import static org.alfresco.repo.virtual.VirtualContentModel.VIRTUAL_CONTENT_MODEL_1_0_URI;
 import static org.alfresco.rest.api.tests.util.RestApiUtil.toJsonAsStringNonNull;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -98,6 +111,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import javax.transaction.UserTransaction;
 
 /**
  * V1 REST API tests for Shared Links (aka public "quick shares")
@@ -118,6 +133,11 @@ public class SharedLinkApiTest extends AbstractBaseApiTest
 
     private QuickShareLinkExpiryActionPersister quickShareLinkExpiryActionPersister;
     private ScheduledPersistedActionService scheduledPersistedActionService;
+    private VirtualStore virtualStore;
+    private NodeService nodeService;
+    private ServiceRegistry serviceRegistry;
+    private TransactionService transactionService;
+    private FileFolderService fileFolderService;
 
     @Before
     public void setup() throws Exception
@@ -125,6 +145,11 @@ public class SharedLinkApiTest extends AbstractBaseApiTest
         super.setup();
         quickShareLinkExpiryActionPersister = applicationContext.getBean("quickShareLinkExpiryActionPersister", QuickShareLinkExpiryActionPersister.class);
         scheduledPersistedActionService = applicationContext.getBean("scheduledPersistedActionService", ScheduledPersistedActionService.class);
+        virtualStore = applicationContext.getBean("smartStore", VirtualStore.class);
+        nodeService = applicationContext.getBean("nodeService", NodeService.class);
+        serviceRegistry = applicationContext.getBean("ServiceRegistry", ServiceRegistry.class);
+        transactionService = serviceRegistry.getTransactionService();
+        fileFolderService = applicationContext.getBean("fileFolderService", FileFolderService.class);
     }
 
     /**
@@ -734,6 +759,100 @@ public class SharedLinkApiTest extends AbstractBaseApiTest
         {
             quickShareLinks.setEnabled(true);
         }
+    }
+
+    /**
+     * Tests shared links to file (content) with smart folder in a multi-tenant system.
+     *
+     * <p>POST:</p>
+     * {@literal <host>:<port>/alfresco/api/<networkId>/public/alfresco/versions/1/shared-links}
+     *
+     * <p>DELETE:</p>
+     * {@literal <host>:<port>/alfresco/api/<networkId>/public/alfresco/versions/1/shared-links/<sharedId>}
+     *
+     *
+     */
+    @Test
+    public void testSharedLinkCreateGetDelete_SmartFolder_MultiTenant() throws Exception
+    {
+        Properties globalProperties = (Properties) applicationContext.getBean("global-properties");
+        globalProperties.setProperty("smart.folders.enabled", "true");
+
+        UserTransaction txn = transactionService.getUserTransaction();
+        txn.begin();
+
+        String networkTenantDomain = networkOne.getId();
+        String jsonTemplatePath = "C/org/alfresco/repo/virtual/template/smartFoldersTemplate.json";
+
+        // As user1
+        setRequestContext(user1);
+
+        TenantUtil.runAsSystemTenant(() ->
+        {
+            String docLibNodeId = getSiteContainerNodeId(tSiteId, "documentLibrary");
+
+            // create normal folder
+            String folderName = "FOLDER";
+            Folder folder = createFolder(docLibNodeId, folderName, null);
+
+            // create doc d1 - pdf
+            String fileName1 = "quick.pdf";
+            File file1 = getResourceFile(fileName1);
+
+            String file1_MimeType = MimetypeMap.MIMETYPE_PDF;
+
+            MultiPartRequest reqBody2 = MultiPartBuilder.create()
+                                                        .setFileData(new FileData(fileName1, file1, file1_MimeType))
+                                                        .build();
+
+            HttpResponse response = post(getNodeChildrenUrl(folder.getId()), reqBody2.getBody(), null, reqBody2.getContentType(), 201);
+            Document doc1 = RestApiUtil.parseRestApiEntry(response.getJsonResponse(), Document.class);
+            String d1Id = doc1.getId();
+            assertNotNull(d1Id);
+
+            // create smart folder
+            String smartFolderName = "smartFolder_1";
+            Folder smartFolder = createFolder(docLibNodeId, smartFolderName, null);
+            NodeRef smartFolderNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, smartFolder.getId());
+
+            Map<QName, Serializable> props = new HashMap<>();
+            props.put(QName.createQName(VIRTUAL_CONTENT_MODEL_1_0_URI, "system-template-location"), jsonTemplatePath);
+            nodeService.addAspect(smartFolderNodeRef, VirtualContentModel.ASPECT_VIRTUAL, props);
+            assertTrue(virtualStore.canVirtualize(smartFolderNodeRef));
+            Reference virtualize = virtualStore.virtualize(smartFolderNodeRef);
+
+            Thread.sleep(5000);
+
+            // get id from virtual pdf doc
+            NodeRef my_content = nodeService.getChildByName(virtualize.toNodeRef(), ContentModel.ASSOC_CONTAINS, "My content");
+            assertNotNull(my_content);
+
+            NodeRef vFile = fileFolderService.searchSimple(my_content, fileName1);
+            String vId = vFile.getId();
+            Reference reference = Reference.fromNodeRef(vFile);
+
+            NodeRef vFileNode = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, vId);
+            assertTrue(nodeService.exists(vFileNode));
+
+            // create shared link to document 1
+            Map<String, String> body = new HashMap<>();
+            body.put("nodeId", vFileNode.getId());
+            response = post(URL_SHARED_LINKS, toJsonAsStringNonNull(body), 201);
+            QuickShareLink resp = RestApiUtil.parseRestApiEntry(response.getJsonResponse(), QuickShareLink.class);
+            String shared1Id = resp.getId();
+            assertNotNull(shared1Id);
+            assertEquals(fileName1, resp.getName());
+            assertEquals(file1_MimeType, resp.getContent().getMimeType());
+            assertEquals(user1, resp.getSharedByUser().getId());
+
+            // delete shared link
+            setRequestContext(user1);
+            deleteSharedLink(shared1Id);
+            globalProperties.setProperty("smart.folders.enabled", "false");
+            return null;
+        }, networkTenantDomain);
+
+        txn.rollback();
     }
 
     /**
