@@ -31,6 +31,7 @@ import org.alfresco.repo.quickshare.QuickShareLinkExpiryActionImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.service.ServiceDescriptorRegistry;
 import org.alfresco.repo.tenant.TenantUtil;
+import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.repo.virtual.VirtualContentModel;
 import org.alfresco.repo.virtual.ref.Reference;
 import org.alfresco.repo.virtual.store.VirtualStore;
@@ -111,8 +112,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import javax.transaction.UserTransaction;
 
 /**
  * V1 REST API tests for Shared Links (aka public "quick shares")
@@ -778,46 +777,59 @@ public class SharedLinkApiTest extends AbstractBaseApiTest
         Properties globalProperties = (Properties) applicationContext.getBean("global-properties");
         globalProperties.setProperty("smart.folders.enabled", "true");
 
-        UserTransaction txn = transactionService.getUserTransaction();
-        txn.begin();
-
         String networkTenantDomain = networkOne.getId();
         String jsonTemplatePath = "C/org/alfresco/repo/virtual/template/smartFoldersTemplate.json";
 
         // As user1
         setRequestContext(user1);
 
+        String docLibNodeId = getSiteContainerNodeId(tSiteId, "documentLibrary");
+
+        // create normal folder
+        String folderName = "FOLDER";
+        Folder folder = createFolder(docLibNodeId, folderName, null);
+
+        // create doc d1 - pdf
+        String fileName1 = "quick.pdf";
+        File file1 = getResourceFile(fileName1);
+
+        String file1_MimeType = MimetypeMap.MIMETYPE_PDF;
+
+        MultiPartRequest reqBody2 = MultiPartBuilder.create()
+                                                    .setFileData(new FileData(fileName1, file1, file1_MimeType))
+                                                    .build();
+
+        HttpResponse response = post(getNodeChildrenUrl(folder.getId()), reqBody2.getBody(), null, reqBody2.getContentType(), 201);
+        Document doc1 = RestApiUtil.parseRestApiEntry(response.getJsonResponse(), Document.class);
+        String d1Id = doc1.getId();
+        assertNotNull(d1Id);
+
+        // create smart folder
+        String smartFolderName = "smartFolder_1";
+        Folder smartFolder = createFolder(docLibNodeId, smartFolderName, null);
+        NodeRef smartFolderNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, smartFolder.getId());
+
+
+        transactionService.getRetryingTransactionHelper().doInTransaction(
+                new RetryingTransactionCallback<Void>()
+                {
+                    public Void execute() throws Throwable
+                    {
+                        Map<QName, Serializable> props = new HashMap<>();
+                        props.put(QName.createQName(VIRTUAL_CONTENT_MODEL_1_0_URI, "system-template-location"), jsonTemplatePath);
+
+                        TenantUtil.runAsSystemTenant(() ->
+                        {
+                            nodeService.addAspect(smartFolderNodeRef, VirtualContentModel.ASPECT_VIRTUAL, props);
+                            assertTrue(virtualStore.canVirtualize(smartFolderNodeRef));
+                            return null;
+                        }, networkTenantDomain);
+                        return null;
+                    }
+                });
+
         TenantUtil.runAsSystemTenant(() ->
         {
-            String docLibNodeId = getSiteContainerNodeId(tSiteId, "documentLibrary");
-
-            // create normal folder
-            String folderName = "FOLDER";
-            Folder folder = createFolder(docLibNodeId, folderName, null);
-
-            // create doc d1 - pdf
-            String fileName1 = "quick.pdf";
-            File file1 = getResourceFile(fileName1);
-
-            String file1_MimeType = MimetypeMap.MIMETYPE_PDF;
-
-            MultiPartRequest reqBody2 = MultiPartBuilder.create()
-                                                        .setFileData(new FileData(fileName1, file1, file1_MimeType))
-                                                        .build();
-
-            HttpResponse response = post(getNodeChildrenUrl(folder.getId()), reqBody2.getBody(), null, reqBody2.getContentType(), 201);
-            Document doc1 = RestApiUtil.parseRestApiEntry(response.getJsonResponse(), Document.class);
-            String d1Id = doc1.getId();
-            assertNotNull(d1Id);
-
-            // create smart folder
-            String smartFolderName = "smartFolder_1";
-            Folder smartFolder = createFolder(docLibNodeId, smartFolderName, null);
-            NodeRef smartFolderNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, smartFolder.getId());
-
-            Map<QName, Serializable> props = new HashMap<>();
-            props.put(QName.createQName(VIRTUAL_CONTENT_MODEL_1_0_URI, "system-template-location"), jsonTemplatePath);
-            nodeService.addAspect(smartFolderNodeRef, VirtualContentModel.ASPECT_VIRTUAL, props);
             assertTrue(virtualStore.canVirtualize(smartFolderNodeRef));
             Reference virtualize = virtualStore.virtualize(smartFolderNodeRef);
 
@@ -828,17 +840,19 @@ public class SharedLinkApiTest extends AbstractBaseApiTest
             assertNotNull(my_content);
 
             NodeRef vFile = fileFolderService.searchSimple(my_content, fileName1);
-            String vId = vFile.getId();
             Reference reference = Reference.fromNodeRef(vFile);
 
-            NodeRef vFileNode = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, vId);
+            NodeRef vFileNode = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, vFile.getId());
             assertTrue(nodeService.exists(vFileNode));
+
+            Map<QName, Serializable> properties = nodeService.getProperties(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, doc1.getId()));
+            Map<QName, Serializable> properties1 = nodeService.getProperties(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, vFile.getId()));
 
             // create shared link to document 1
             Map<String, String> body = new HashMap<>();
-            body.put("nodeId", vFileNode.getId());
-            response = post(URL_SHARED_LINKS, toJsonAsStringNonNull(body), 201);
-            QuickShareLink resp = RestApiUtil.parseRestApiEntry(response.getJsonResponse(), QuickShareLink.class);
+            body.put("nodeId", vFile.getId());
+            HttpResponse response1 = post(URL_SHARED_LINKS, toJsonAsStringNonNull(body), 201);
+            QuickShareLink resp = RestApiUtil.parseRestApiEntry(response1.getJsonResponse(), QuickShareLink.class);
             String shared1Id = resp.getId();
             assertNotNull(shared1Id);
             assertEquals(fileName1, resp.getName());
@@ -851,8 +865,6 @@ public class SharedLinkApiTest extends AbstractBaseApiTest
             globalProperties.setProperty("smart.folders.enabled", "false");
             return null;
         }, networkTenantDomain);
-
-        txn.rollback();
     }
 
     /**
