@@ -41,7 +41,8 @@ import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
 import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
-import org.activiti.engine.impl.pvm.ReadOnlyProcessDefinition;
+import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityImpl;
+import org.activiti.engine.impl.util.ProcessDefinitionUtil;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -74,7 +75,7 @@ public class ActivitiUtil
         this.managementService = engine.getManagementService();
         this.deployWorkflowsInTenant = deployWorkflowsInTenant;
     }
-    
+
     public ActivitiUtil(ProcessEngine engine, boolean deployWorkflowsInTenant, boolean retentionHistoricProcessInstance)
     {
         this.repoService = engine.getRepositoryService();
@@ -108,14 +109,14 @@ public class ActivitiUtil
             .deploymentId(deploymentId)
             .singleResult();
     }
-    
+
     public ProcessInstance getProcessInstance(String id)
     {
         return runtimeService.createProcessInstanceQuery()
             .processInstanceId(id)
             .singleResult();
     }
-    
+
     public Task getTaskInstance(String taskId)
     {
         TaskQuery taskQuery = taskService.createTaskQuery().taskId(taskId);
@@ -124,7 +125,7 @@ public class ActivitiUtil
         }
         return taskQuery.singleResult();
     }
-    
+
     public HistoricProcessInstance getHistoricProcessInstance(String id)
     {
         return historyService.createHistoricProcessInstanceQuery()
@@ -138,22 +139,22 @@ public class ActivitiUtil
             .executionId(id)
             .singleResult();
     }
-    
-    public ReadOnlyProcessDefinition getDeployedProcessDefinition(String processDefinitionId) 
-    {
-        // Currently, getDeployedProcessDefinition is still experimental and not exposed on 
-        // RepositoryService interface
-        return ((RepositoryServiceImpl)repoService).getDeployedProcessDefinition(processDefinitionId);
+//
+//    public ReadOnlyProcessDefinition getDeployedProcessDefinition(String processDefinitionId)
+//    {
+//        // Currently, getDeployedProcessDefinition is still experimental and not exposed on
+//        // RepositoryService interface
+//        return ((RepositoryServiceImpl)repoService).getDeployedProcessDefinition(processDefinitionId);
+//    }
+
+    public ProcessDefinition getDeployedProcessDefinition(String processDefinitionId){
+        return ProcessDefinitionUtil.getProcessDefinitionFromDatabase(processDefinitionId);
     }
-    
+
     public String getStartFormKey(String processDefinitionId)
     {
-        ProcessDefinitionEntity procDef = (ProcessDefinitionEntity) getDeployedProcessDefinition(processDefinitionId);
-        if(procDef.getStartFormHandler() == null) 
-        {
-            return null;
-        }
-        return procDef.getStartFormHandler().createStartFormData(procDef).getFormKey();
+        ProcessDefinitionEntityImpl procDef = (ProcessDefinitionEntityImpl) ProcessDefinitionUtil.getProcessDefinitionFromDatabase(processDefinitionId);
+        return procDef.getKey();
     }
     
     public String getStartTaskTypeName(String processDefinitionId)

@@ -32,6 +32,7 @@ import org.activiti.engine.form.FormData;
 import org.activiti.engine.form.TaskFormData;
 import org.activiti.engine.impl.form.TaskFormHandler;
 import org.activiti.engine.impl.persistence.entity.TaskEntity;
+import org.activiti.engine.impl.persistence.entity.TaskEntityImpl;
 import org.activiti.engine.task.Task;
 import org.alfresco.repo.workflow.WorkflowObjectFactory;
 import org.alfresco.service.cmr.dictionary.TypeDefinition;
@@ -64,14 +65,9 @@ public class ActivitiTaskTypeManager
     
     public TypeDefinition getFullTaskDefinition(DelegateTask delegateTask)
     {
-        FormData formData = null;
         TaskEntity taskEntity = (TaskEntity) delegateTask;
-        TaskFormHandler taskFormHandler = taskEntity.getTaskDefinition().getTaskFormHandler();
-        if (taskFormHandler != null)
-        {
-            formData = taskFormHandler.createTaskForm(taskEntity);
-        }
-        return getFullTaskDefinition(delegateTask.getId(), formData);
+        TaskEntityImpl taskEntityImpl = (TaskEntityImpl) taskEntity;
+        return factory.getTaskFullTypeDefinition(taskEntityImpl.getFormKey(), false);
     }
     
     public TypeDefinition getFullTaskDefinition(String typeName)
