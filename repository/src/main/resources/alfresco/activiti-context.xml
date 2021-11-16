@@ -14,7 +14,9 @@
         class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
         <property name="targetDataSource" ref="dataSource" />
     </bean>
-    
+
+    <bean id="activiti5CompabilityFactory" class="org.activiti.compatibility.spring.SpringActiviti5CompatibilityHandlerFactory" /
+
     <!-- Additional datasource to use for Activit's ID-generator -->
     <bean id="activitiIdGeneratorDataSource" class="org.alfresco.config.JndiObjectFactoryBean">
         <property name="jndiName">

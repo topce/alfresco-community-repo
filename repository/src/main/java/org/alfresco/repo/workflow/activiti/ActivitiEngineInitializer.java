@@ -55,7 +55,7 @@ public class ActivitiEngineInitializer extends AbstractLifecycleBean
     	
     	if (workflowAdminService.isEngineEnabled(ActivitiConstants.ENGINE_ID)) 
     	{
-    		((ProcessEngineImpl)processEngine).getProcessEngineConfiguration().getJobExecutor().start();
+    		((ProcessEngineImpl)processEngine).getProcessEngineConfiguration().init();
     	}
     }
 

@@ -53,11 +53,13 @@ import org.activiti.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
 import org.activiti.engine.impl.form.DefaultTaskFormHandler;
 import org.activiti.engine.impl.form.TaskFormHandler;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
+import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityImpl;
 import org.activiti.engine.impl.pvm.PvmActivity;
 import org.activiti.engine.impl.pvm.PvmTransition;
 import org.activiti.engine.impl.pvm.ReadOnlyProcessDefinition;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.impl.task.TaskDefinition;
+import org.activiti.engine.impl.util.ProcessDefinitionUtil;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
@@ -206,7 +208,8 @@ public class ActivitiTypeConverter
         }
         
         // Fetch node based on cached process-definition
-        ReadOnlyProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(task.getProcessDefinitionId());
+        ProcessDefinitionEntityImpl procDef = (ProcessDefinitionEntityImpl) activitiUtil.getDeployedProcessDefinition(task.getProcessDefinitionId());
+
         WorkflowNode node = convert(procDef.findActivity(task.getTaskDefinitionKey()), true);
         
         return factory.createTaskDefinition(taskDefId, node, taskDefId, false);

@@ -45,8 +45,15 @@ import org.alfresco.service.cmr.repository.ScriptService;
 public class AlfrescoScriptDelegate extends DelegateExecutionScriptBase implements JavaDelegate 
 {
     @Override
-    public void execute(DelegateExecution execution) throws Exception 
+    public void execute(DelegateExecution execution)
     {
-        runScript(execution);
+        try
+        {
+            runScript(execution);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 }

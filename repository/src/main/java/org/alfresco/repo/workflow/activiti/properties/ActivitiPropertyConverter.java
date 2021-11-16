@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.engine.RepositoryService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.delegate.DelegateTask;
 import org.activiti.engine.history.HistoricActivityInstance;
@@ -44,8 +46,10 @@ import org.activiti.engine.history.HistoricDetailQuery;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricVariableUpdate;
+import org.activiti.engine.impl.context.Context;
+import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityImpl;
 import org.activiti.engine.impl.persistence.entity.TaskEntity;
-import org.activiti.engine.impl.pvm.ReadOnlyProcessDefinition;
+import org.activiti.engine.impl.util.ProcessDefinitionUtil;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.IdentityLinkType;
@@ -417,7 +421,7 @@ public class ActivitiPropertyConverter
         if (description == null || description.length() == 0)
         {
             //Try the localised task description first
-            String processDefinitionKey = ((ProcessDefinition) ((TaskEntity)task).getExecution().getProcessDefinition()).getKey();
+            String processDefinitionKey = task.getProcessDefinitionId();
             description = factory.getTaskDescription(typeDefinition, factory.buildGlobalId(processDefinitionKey), null, task.getTaskDefinitionKey());
             if (description != null && description.length() > 0) {
                 defaultValues.put(WorkflowModel.PROP_DESCRIPTION,  description);
@@ -944,8 +948,10 @@ public class ActivitiPropertyConverter
         {
             String wfDescription = (String) defaultProperties.get(WorkflowModel.PROP_WORKFLOW_DESCRIPTION);
             String procDefKey = procDef.getKey();
-            ReadOnlyProcessDefinition deployedDef = activitiUtil.getDeployedProcessDefinition(processDefId);
-            String startEventName = deployedDef.getInitial().getId();
+//            ReadOnlyProcessDefinition deployedDef = activitiUtil.getDeployedProcessDefinition(processDefId);
+            ProcessDefinitionEntityImpl deployedDef =
+                        (ProcessDefinitionEntityImpl) ProcessDefinitionUtil.getProcessDefinitionFromDatabase(processDefId);
+            String startEventName = deployedDef.getName();
             String wfDefKey = factory.buildGlobalId(procDefKey);
             description = factory.getTaskDescription(startTaskType, wfDefKey, wfDescription, startEventName);
             defaultProperties.put(WorkflowModel.PROP_DESCRIPTION, description);

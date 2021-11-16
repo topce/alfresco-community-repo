@@ -51,7 +51,7 @@ public class ProcessStartExecutionListener implements ExecutionListener
     protected TenantService tenantService;
     protected boolean deployWorkflowsInTenant;
     
-    public void notify(DelegateExecution execution) throws Exception
+    public void notify(DelegateExecution execution)
     {
         // Add the workflow ID
         String instanceId = BPMEngineRegistry.createGlobalId(ActivitiConstants.ENGINE_ID, execution.getId());
