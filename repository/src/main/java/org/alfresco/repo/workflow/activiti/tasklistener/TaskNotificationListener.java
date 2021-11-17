@@ -31,12 +31,9 @@ import java.util.List;
 
 import org.activiti.engine.delegate.DelegateTask;
 import org.activiti.engine.delegate.TaskListener;
-import org.activiti.engine.form.FormData;
-import org.activiti.engine.impl.form.TaskFormHandler;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.IdentityLinkEntity;
 import org.activiti.engine.impl.persistence.entity.TaskEntity;
-import org.activiti.engine.repository.ProcessDefinition;
 import org.alfresco.repo.workflow.WorkflowNotificationUtils;
 import org.alfresco.repo.workflow.activiti.ActivitiConstants;
 import org.alfresco.repo.workflow.activiti.ActivitiScriptNode;
@@ -130,7 +127,7 @@ public class TaskNotificationListener implements TaskListener
             
             if (taskFormKey != null) 
             {
-                String processDefinitionKey = ((ProcessDefinition) ((TaskEntity)task).getExecution().getProcessDefinition()).getKey();
+                String processDefinitionKey = ((TaskEntity)task).getExecution().getProcessDefinitionKey();
                 String defName = propertyConverter.getWorkflowObjectFactory().buildGlobalId(processDefinitionKey);
                 title = propertyConverter.getWorkflowObjectFactory().getTaskTitle(typeDefinition, defName, task.getName(), taskFormKey.replace(":", "_"));
             }
@@ -170,14 +167,7 @@ public class TaskNotificationListener implements TaskListener
 
     private String getFormKey(DelegateTask task)
     {
-        FormData formData = null;
         TaskEntity taskEntity = (TaskEntity) task;
-        TaskFormHandler taskFormHandler = taskEntity.getTaskDefinition().getTaskFormHandler();
-        if (taskFormHandler != null)
-        {
-            formData = taskFormHandler.createTaskForm(taskEntity);
-            if (formData != null) { return formData.getFormKey(); }
-        }
-        return null;
+        return taskEntity.getTaskDefinitionKey();
     }
 }
