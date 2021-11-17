@@ -28,8 +28,6 @@ package org.alfresco.repo.workflow.activiti.tasklistener;
 
 import org.activiti.engine.delegate.DelegateTask;
 import org.activiti.engine.delegate.TaskListener;
-import org.activiti.engine.form.FormData;
-import org.activiti.engine.impl.form.TaskFormHandler;
 import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.task.IdentityLinkType;
 import org.alfresco.model.ContentModel;
@@ -77,15 +75,8 @@ public class TaskCreateListener implements TaskListener
 
     private String getFormKey(DelegateTask task)
     {
-        FormData formData = null;
         TaskEntity taskEntity = (TaskEntity) task;
-        TaskFormHandler taskFormHandler = taskEntity.getTaskDefinition().getTaskFormHandler();
-        if (taskFormHandler != null)
-        {
-            formData = taskFormHandler.createTaskForm(taskEntity);
-            if (formData != null) { return formData.getFormKey(); }
-        }
-        return null;
+        return taskEntity.getTaskDefinitionKey();
     }
     
     /**
