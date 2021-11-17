@@ -59,7 +59,7 @@ public class ConvertDateToISO8601 implements ExecutionListener
     }    
     
     @Override
-    public void notify(DelegateExecution execution) throws Exception
+    public void notify(DelegateExecution execution)
     {
         String sourceVarName = getExpressionString(source, execution);
         String targetVarName = getExpressionString(target, execution);
