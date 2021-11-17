@@ -34,6 +34,7 @@ import org.activiti.engine.delegate.TaskListener;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.IdentityLinkEntity;
 import org.activiti.engine.impl.persistence.entity.TaskEntity;
+import org.activiti.engine.impl.util.ProcessDefinitionUtil;
 import org.alfresco.repo.workflow.WorkflowNotificationUtils;
 import org.alfresco.repo.workflow.activiti.ActivitiConstants;
 import org.alfresco.repo.workflow.activiti.ActivitiScriptNode;
@@ -127,7 +128,8 @@ public class TaskNotificationListener implements TaskListener
             
             if (taskFormKey != null) 
             {
-                String processDefinitionKey = ((TaskEntity)task).getExecution().getProcessDefinitionKey();
+                String processDefinitionKey =
+                            ProcessDefinitionUtil.getProcessDefinition(((TaskEntity)task).getExecution().getProcessDefinitionId()).getKey();
                 String defName = propertyConverter.getWorkflowObjectFactory().buildGlobalId(processDefinitionKey);
                 title = propertyConverter.getWorkflowObjectFactory().getTaskTitle(typeDefinition, defName, task.getName(), taskFormKey.replace(":", "_"));
             }
