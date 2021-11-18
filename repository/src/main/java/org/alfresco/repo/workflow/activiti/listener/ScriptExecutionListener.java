@@ -30,7 +30,7 @@ import java.util.Map;
 
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.delegate.ExecutionListener;
-import org.activiti.engine.impl.pvm.delegate.ExecutionListenerExecution;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.alfresco.repo.workflow.activiti.ActivitiConstants;
 import org.alfresco.repo.workflow.activiti.script.DelegateExecutionScriptBase;
 import org.alfresco.service.cmr.repository.ScriptService;
@@ -54,9 +54,16 @@ public class ScriptExecutionListener extends DelegateExecutionScriptBase impleme
     private static final String CANCELLED_FLAG = "cancelled";
 
     @Override
-    public void notify(DelegateExecution execution) throws Exception 
+    public void notify(DelegateExecution execution)
     {
-        runScript(execution);
+        try
+        {
+            runScript(execution);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
     
     @Override
@@ -65,9 +72,9 @@ public class ScriptExecutionListener extends DelegateExecutionScriptBase impleme
     {
         Map<String, Object> scriptModel =  super.getInputMap(execution, runAsUser);
 
-        ExecutionListenerExecution listenerExecution = (ExecutionListenerExecution) execution;
+        ExecutionEntity listenerExecution = (ExecutionEntity) execution;
 
-        // Add deleted/cancelled flags
+        // Add deleted/cancelled fFlowElementlags
         boolean cancelled = false;
         boolean deleted = false;
         

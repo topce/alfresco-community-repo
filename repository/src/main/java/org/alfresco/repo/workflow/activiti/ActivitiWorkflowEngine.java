@@ -71,6 +71,7 @@ import org.activiti.engine.impl.persistence.entity.TimerEntity;
 import org.activiti.engine.impl.pvm.PvmActivity;
 import org.activiti.engine.impl.pvm.ReadOnlyProcessDefinition;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
+import org.activiti.engine.impl.util.ProcessDefinitionUtil;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
@@ -1286,7 +1287,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
             public String apply(HistoricTaskInstance task)
             {
                 String defId = task.getProcessDefinitionId();
-                ProcessDefinition definition = (ProcessDefinition) activitiUtil.getDeployedProcessDefinition(defId);
+                ProcessDefinition definition = ProcessDefinitionUtil.getProcessDefinition(defId);
                 return definition.getKey();
             }
         });
