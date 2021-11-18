@@ -26,11 +26,7 @@
 
 package org.alfresco.repo.workflow.activiti;
 
-import org.activiti.engine.FormService;
 import org.activiti.engine.delegate.DelegateTask;
-import org.activiti.engine.form.FormData;
-import org.activiti.engine.form.TaskFormData;
-import org.activiti.engine.impl.form.TaskFormHandler;
 import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.impl.persistence.entity.TaskEntityImpl;
 import org.activiti.engine.task.Task;
@@ -44,12 +40,10 @@ import org.alfresco.service.cmr.dictionary.TypeDefinition;
 public class ActivitiTaskTypeManager
 {
     private final WorkflowObjectFactory factory;
-    private final FormService formService;
-    
-    public ActivitiTaskTypeManager(WorkflowObjectFactory factory, FormService formService)
+
+    public ActivitiTaskTypeManager(WorkflowObjectFactory factory)
     {
         this.factory = factory;
-        this.formService = formService;
     }
 
     public TypeDefinition getStartTaskDefinition(String taskTypeName) 
@@ -59,8 +53,7 @@ public class ActivitiTaskTypeManager
     
     public TypeDefinition getFullTaskDefinition(Task task)
     {
-        TaskFormData taskFormData = formService.getTaskFormData(task.getId());
-        return getFullTaskDefinition(task.getId(), taskFormData);
+        return getFullTaskDefinition(task.getId(), task.getFormKey());
     }
     
     public TypeDefinition getFullTaskDefinition(DelegateTask delegateTask)
@@ -75,12 +68,12 @@ public class ActivitiTaskTypeManager
         return getFullTaskDefinition(typeName, null);
     }
     
-    private TypeDefinition getFullTaskDefinition(String taskDefinitionKey, FormData taskFormData)
+    private TypeDefinition getFullTaskDefinition(String taskDefinitionKey, String taskFormDataKey)
     {
         String formKey = null;
-        if (taskFormData != null)
+        if (taskFormDataKey != null)
         {
-            formKey = taskFormData.getFormKey();
+            formKey = taskFormDataKey;
         }
         else
         {
