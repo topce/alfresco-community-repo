@@ -170,6 +170,6 @@ public class TaskNotificationListener implements TaskListener
     private String getFormKey(DelegateTask task)
     {
         TaskEntity taskEntity = (TaskEntity) task;
-        return taskEntity.getTaskDefinitionKey();
+        return taskEntity.getFormKey();
     }
 }
