@@ -43,7 +43,6 @@ import java.util.Set;
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.ActivitiException;
-import org.activiti.engine.FormService;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
@@ -188,7 +187,6 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
     private TaskService taskService;
     private HistoryService historyService;
     private ManagementService managementService;
-    private FormService formService;
     protected ActivitiUtil activitiUtil;
     
     private DictionaryService dictionaryService;
@@ -220,7 +218,6 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
          this.repoService = activitiUtil.getRepositoryService();
          this.runtimeService = activitiUtil.getRuntimeService();
          this.taskService = activitiUtil.getTaskService();
-         this.formService = activitiUtil.getFormService();
          this.historyService = activitiUtil.getHistoryService();
          this.managementService = activitiUtil.getManagementService();
      }
@@ -1874,14 +1871,6 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
              else if (orderByPart == WorkflowTaskQuery.OrderBy.TaskActor_Desc)
              {
                  taskQuery.orderByTaskAssignee().desc();
-             }
-             else if (orderByPart == WorkflowTaskQuery.OrderBy.TaskCreated_Asc)
-             {
-                 taskQuery.orderByHistoricActivityInstanceStartTime().asc();
-             }
-             else if (orderByPart == WorkflowTaskQuery.OrderBy.TaskCreated_Desc)
-             {
-                 taskQuery.orderByHistoricActivityInstanceStartTime().desc();
              }
              else if (orderByPart == WorkflowTaskQuery.OrderBy.TaskDue_Asc)
              {
