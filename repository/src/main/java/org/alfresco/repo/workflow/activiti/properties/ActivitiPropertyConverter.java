@@ -118,7 +118,7 @@ public class ActivitiPropertyConverter
         this.authorityManager = authorityManager;
         this.messageService = messageService;
         this.nodeConverter = nodeConverter;
-        this.typeManager = new ActivitiTaskTypeManager(factory, activitiUtil.getFormService());
+        this.typeManager = new ActivitiTaskTypeManager(factory);
     }
 
     public Map<QName, Serializable> getTaskProperties(Task task)
