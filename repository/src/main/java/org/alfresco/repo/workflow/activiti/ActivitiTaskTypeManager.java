@@ -55,12 +55,11 @@ public class ActivitiTaskTypeManager
     {
         return getFullTaskDefinition(task.getId(), task.getFormKey());
     }
-    
+
     public TypeDefinition getFullTaskDefinition(DelegateTask delegateTask)
     {
         TaskEntity taskEntity = (TaskEntity) delegateTask;
-        TaskEntityImpl taskEntityImpl = (TaskEntityImpl) taskEntity;
-        return factory.getTaskFullTypeDefinition(taskEntityImpl.getFormKey(), false);
+        return getFullTaskDefinition(delegateTask.getId(), taskEntity.getFormKey());
     }
     
     public TypeDefinition getFullTaskDefinition(String typeName)
