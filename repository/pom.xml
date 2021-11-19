@@ -568,6 +568,12 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-image-generator</artifactId>
+            <version>${dependency.activiti.version}</version>
+        </dependency>
+
         <!-- Keycloak dependencies -->
         <dependency>
             <groupId>org.keycloak</groupId>
