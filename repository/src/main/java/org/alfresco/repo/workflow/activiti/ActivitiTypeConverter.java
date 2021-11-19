@@ -578,7 +578,9 @@ public class ActivitiTypeConverter
         // Convert start-event to start-task Node
         String definitionId = processInstance.getProcessDefinitionId();
         ProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(definitionId);
-        WorkflowNode startNode = convert(procDef.getInitial(), true);
+        WorkflowNode startNode = convert(repositoryService.getBpmnModel(procDef.getId())
+                    .getProcessById(procDef.getKey())
+                    .getInitialFlowElement(), true);
         
         String key = ((ProcessDefinition)procDef).getKey();
         FlowElement startElement = getStartFormData(definitionId, key);
@@ -665,7 +667,10 @@ public class ActivitiTypeConverter
         
         // Convert start-event to start-task Node
         ProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(historicProcessInstance.getProcessDefinitionId());
-        WorkflowNode startNode = convert(procDef.getInitial(), true);
+        WorkflowNode startNode = convert(repositoryService
+                    .getBpmnModel(procDef.getId())
+                    .getProcessById(procDef.getKey())
+                    .getInitialFlowElement(), true);
         
         String taskDefId = activitiUtil.getStartFormKey(historicProcessInstance.getProcessDefinitionId());
         WorkflowTaskDefinition taskDef = factory.createTaskDefinition(taskDefId, startNode, taskDefId, true);
@@ -778,8 +783,9 @@ public class ActivitiTypeConverter
     private WorkflowNode buildHistoricTaskWorkflowNode(HistoricTaskInstance historicTaskInstance) 
     {
     	ProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(historicTaskInstance.getProcessDefinitionId());
-    	PvmActivity taskActivity = procDef.findActivity(historicTaskInstance.getTaskDefinitionKey());
-		return convert(taskActivity);
+        FlowElement flowElement = repositoryService.getBpmnModel(procDef.getId()).getFlowElement(procDef.getKey());
+
+		return convert(flowElement);
 	}
 
 	public WorkflowPath buildCompletedPath(String executionId, String processInstanceId)

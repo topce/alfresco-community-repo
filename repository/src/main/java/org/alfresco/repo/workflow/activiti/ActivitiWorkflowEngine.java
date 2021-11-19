@@ -44,7 +44,6 @@ import java.util.Set;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.bpmn.model.Process;
-import org.activiti.bpmn.model.StartEvent;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.ManagementService;
@@ -75,6 +74,7 @@ import org.activiti.engine.runtime.Job;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
+import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.i18n.MessageService;
 import org.alfresco.repo.model.Repository;
@@ -127,6 +127,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.activiti.image.ProcessDiagramGenerator;
 
 /**
  * @author Nick Smith
@@ -722,9 +723,9 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
 
     private boolean isFirstActivity(FlowElement activity, ProcessDefinition procDef)
     {
-        if(procDef.getInitial().getOutgoingTransitions().size() == 1) 
+        if(procDef.getInitial().getOutgoingTransitions().size() == 1)
         {
-            if (procDef.getInitial().getOutgoingTransitions().get(0).getDestination().equals(activity)) 
+            if (procDef.getInitial().getOutgoingTransitions().get(0).getDestination().equals(activity))
             {
                 return true;
             }
@@ -850,7 +851,8 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
             
             if(activeActivityIds.size() == 1)
             {
-                FlowElement targetActivity = def.findActivity(activeActivityIds.get(0));
+                FlowElement targetActivity = repoService.getBpmnModel(def.getId())
+                            .getProcessById(def.getKey()).getFlowElement(activeActivityIds.get(0));
                 if(targetActivity != null)
                 {
                     // Only get tasks of active activity is a user-task 
