@@ -46,6 +46,7 @@ import org.activiti.bpmn.model.StartEvent;
 import org.activiti.engine.FormService;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.ProcessEngine;
+import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.form.TaskFormData;
@@ -95,6 +96,7 @@ public class ActivitiTypeConverter
     private static final String DEFAULT_TRANSITION_KEY= "bpm_businessprocessmodel.transition";
     
     private final RuntimeService runtimeService;
+    private final RepositoryService repositoryService;
     private final HistoryService historyService;
     private final ActivitiPropertyConverter propertyConverter;
     private final WorkflowObjectFactory factory;
@@ -103,11 +105,13 @@ public class ActivitiTypeConverter
     
     public ActivitiTypeConverter(ProcessEngine processEngine, 
                 WorkflowObjectFactory factory,
+                RepositoryService repositoryService,
                 ActivitiPropertyConverter propertyConverter, boolean deployWorkflowsInTenant)
     {
         this.runtimeService = processEngine.getRuntimeService();
         this.historyService = processEngine.getHistoryService();
         this.factory = factory;
+        this.repositoryService = repositoryService;
         this.propertyConverter =propertyConverter;
         this.activitiUtil = new ActivitiUtil(processEngine, deployWorkflowsInTenant);
     }
@@ -182,7 +186,10 @@ public class ActivitiTypeConverter
 
 
         ProcessDefinition def = activitiUtil.getDeployedProcessDefinition(defId);
-        PvmActivity startEvent = def.getInitial();
+        FlowElement startEvent = repositoryService
+                    .getBpmnModel(def.getId())
+                    .getProcessById(def.getKey())
+                    .getInitialFlowElement();
         WorkflowTaskDefinition startTask = getTaskDefinition(startEvent, startTaskName, definition.getKey(), true);
         
         return factory.createDefinition(defId,
@@ -197,7 +204,7 @@ public class ActivitiTypeConverter
         return process.getInitialFlowElement();
     }
     
-    public WorkflowTaskDefinition getTaskDefinition(PvmActivity activity, String taskFormKey, String processKey, boolean isStart)
+    public WorkflowTaskDefinition getTaskDefinition(FlowElement activity, String taskFormKey, String processKey, boolean isStart)
     {
         WorkflowNode node = getNode(activity, processKey, true);
         String taskDefId = taskFormKey == null ? node.getName() : taskFormKey;
@@ -207,17 +214,12 @@ public class ActivitiTypeConverter
     public WorkflowTaskDefinition getTaskDefinition(Task task)
     {
     	// Get the task-form used (retrieved from cached process-definition)
-    	TaskFormData taskFormData = formService.getTaskFormData(task.getId());
-        String taskDefId = null;
-        if(taskFormData != null) 
-        {
-            taskDefId = taskFormData.getFormKey();
-        }
+        String taskDefId = task.getFormKey();
         
         // Fetch node based on cached process-definition
         ProcessDefinitionEntityImpl procDef = (ProcessDefinitionEntityImpl) activitiUtil.getDeployedProcessDefinition(task.getProcessDefinitionId());
 
-        WorkflowNode node = convert(procDef.findActivity(task.getTaskDefinitionKey()), true);
+        WorkflowNode node = convert(repositoryService.getBpmnModel(procDef.getId()).getFlowElement(procDef.getKey()), true);
         
         return factory.createTaskDefinition(taskDefId, node, taskDefId, false);
     }
@@ -231,10 +233,13 @@ public class ActivitiTypeConverter
     public WorkflowTaskDefinition getTaskDefinition(String taskDefinitionKey, String processDefinitionId)
     {
     	 ProcessDefinitionEntity procDef = (ProcessDefinitionEntity) activitiUtil.getDeployedProcessDefinition(processDefinitionId);
-    	 Collection<PvmActivity> userTasks = findUserTasks(procDef.getInitial());
-    	 
+    	 Collection<FlowElement> userTasks = findUserTasks(repositoryService
+                     .getBpmnModel(procDef.getId()).
+                     getProcessById(procDef.getKey())
+                     .getInitialFlowElement());
+    	 // TODO: To consider
     	 TaskDefinition taskDefinition = null;
-    	 for(PvmActivity activity : userTasks)
+    	 for(FlowElement activity : userTasks)
     	 {
     		 taskDefinition = procDef.getTaskDefinitions().get(activity.getId());
     		 if(taskDefinitionKey.equals(taskDefinition.getKey()))
@@ -314,16 +319,18 @@ public class ActivitiTypeConverter
         if (nodeIds != null && nodeIds.size() >= 1)
         {
             ProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(instance.getProcessDefinitionId());
-            PvmActivity activity = procDef.findActivity(nodeIds.get(0));
+            FlowElement activity = repositoryService.getBpmnModel(procDef.getId())
+                        .getProcessById(procDef.getKey())
+                        .getInitialFlowElement();
             node = convert(activity);
         }
 
         return factory.createPath(execution.getId(), wfInstance, node, isActive);
     }
     
-    public WorkflowNode convert(PvmActivity activity, boolean forceIsTaskNode)
+    public WorkflowNode convert(FlowElement activity, boolean forceIsTaskNode)
     {
-    	 String procDefId = activity.getProcessDefinition().getId();
+    	 String procDefId = activity.getId();
          String key = activitiUtil.getProcessDefinition(procDefId).getKey();
          return getNode(activity, key, forceIsTaskNode);
     }
@@ -334,9 +341,10 @@ public class ActivitiTypeConverter
      * @param forceIsTaskNode boolean
      * @return WorkflowNode
      */
-    private WorkflowNode getNode(PvmActivity activity, String key, boolean forceIsTaskNode)
+    private WorkflowNode getNode(FlowElement activity, String key, boolean forceIsTaskNode)
     {
         String name = activity.getId();
+        // TODO: How to these properties from FlowElement ?
          String defaultTitle = (String) activity.getProperty(ActivitiConstants.NODE_NAME);
          String defaultDescription = (String) activity.getProperty(ActivitiConstants.NODE_DESCRIPTION);
          String type = (String) activity.getProperty(ActivitiConstants.NODE_TYPE);
@@ -354,7 +362,7 @@ public class ActivitiTypeConverter
         return factory.createNode(name, key, defaultTitle, defaultDescription, type, isTaskNode, transition);
     }
     
-    public WorkflowNode convert(PvmActivity activity)
+    public WorkflowNode convert(FlowElement activity)
     {
        return convert(activity, false);
     }
@@ -426,10 +434,6 @@ public class ActivitiTypeConverter
         if (obj instanceof Execution)
         {
             return convert( (Execution) obj);
-        }
-        if (obj instanceof ActivityImpl)
-        {
-            return convert( (ActivityImpl) obj);
         }
         if (obj instanceof Task)
         {
@@ -733,7 +737,7 @@ public class ActivitiTypeConverter
          return path;
     }
     
-    public String getFormKey(PvmActivity act, ProcessDefinition processDefinition)
+    public String getFormKey(FlowElement act, ProcessDefinition processDefinition)
     {
         if(act instanceof ActivityImpl) 
         {
@@ -829,10 +833,10 @@ public class ActivitiTypeConverter
     	return ((ProcessDefinition) def).getKey();
     }
     
-    public Collection<PvmActivity> findUserTasks(PvmActivity startEvent)
+    public Collection<FlowElement> findUserTasks(FlowElement startEvent)
     {
         // Use a linked hashmap to get the task defs in the right order
-        Map<String, PvmActivity> userTasks = new LinkedHashMap<String, PvmActivity>();
+        Map<String, FlowElement> userTasks = new LinkedHashMap<String, FlowElement>();
         Set<String> processedActivities = new HashSet<String>();
         
         // Start finding activities recursively
@@ -841,7 +845,7 @@ public class ActivitiTypeConverter
         return userTasks.values();
     }
 
-    private void findUserTasks(PvmActivity currentActivity, Map<String, PvmActivity> userTasks, Set<String> processedActivities)
+    private void findUserTasks(FlowElement currentActivity, Map<String, FlowElement> userTasks, Set<String> processedActivities)
     {
         // Only process activity if not already processed, to prevent endless loops
         if(!processedActivities.contains(currentActivity.getId()))

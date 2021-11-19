@@ -42,6 +42,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.bpmn.model.FlowElement;
+import org.activiti.bpmn.model.Process;
+import org.activiti.bpmn.model.StartEvent;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.ManagementService;
@@ -50,7 +53,6 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiEventBuilder;
-import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.activiti.engine.history.HistoricTaskInstance;
@@ -58,19 +60,12 @@ import org.activiti.engine.history.HistoricTaskInstanceQuery;
 import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.bpmn.behavior.ReceiveTaskActivityBehavior;
 import org.activiti.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
-import org.activiti.engine.impl.bpmn.deployer.BpmnDeployer;
 import org.activiti.engine.impl.context.Context;
-import org.activiti.engine.impl.form.DefaultTaskFormHandler;
-import org.activiti.engine.impl.form.TaskFormHandler;
 import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
-import org.activiti.engine.impl.persistence.entity.TimerEntity;
 import org.activiti.engine.impl.persistence.entity.TimerJobEntity;
-import org.activiti.engine.impl.pvm.PvmActivity;
-import org.activiti.engine.impl.pvm.ProcessDefinition;
-import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.impl.util.ProcessDefinitionUtil;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
@@ -80,8 +75,6 @@ import org.activiti.engine.runtime.Job;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
-import org.activiti.image.ProcessDiagramGenerator;
-import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.i18n.MessageService;
 import org.alfresco.repo.model.Repository;
@@ -691,23 +684,24 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
 
         String processName = ((ProcessDefinition)processDefinition).getKey();
         factory.checkDomain(processName);
-        
-        // Process start task definition
-        PvmActivity startEvent = processDefinition.getInitial();
-        
+
         String startTaskName = null;
-        StartFormData startFormData = formService.getStartFormData(processDefinition.getId());
-        if(startFormData != null) 
+        StartEvent startEvent = null;
+        Process process = ProcessDefinitionUtil.getBpmnModel(processDefinition.getId())
+                    .getProcessById(processDefinition.getName());
+        FlowElement startElement = process.getInitialFlowElement();
+        if(startElement instanceof StartEvent)
         {
-            startTaskName = startFormData.getFormKey();
+            startEvent = (StartEvent) startElement;
+            startTaskName = startEvent.getFormKey();
         }
         
         // Add start task definition
         defs.add(typeConverter.getTaskDefinition(startEvent, startTaskName, processDefinition.getId(), true));
         
         // Now, continue through process, finding all user-tasks
-        Collection<PvmActivity> taskActivities = typeConverter.findUserTasks(startEvent);
-        for(PvmActivity act : taskActivities)
+        Collection<FlowElement> taskActivities = typeConverter.findUserTasks(startEvent);
+        for(FlowElement act : taskActivities)
         {
             String formKey = typeConverter.getFormKey(act, processDefinition);
             defs.add(typeConverter.getTaskDefinition(act, formKey, processDefinition.getId(), false));
@@ -715,28 +709,8 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
         
        return defs;
     }
-    
-    private String getFormKey(PvmActivity act)
-    {
-        if(act instanceof ActivityImpl) 
-        {
-            ActivityImpl actImpl = (ActivityImpl) act;
-            if (actImpl.getActivityBehavior() instanceof UserTaskActivityBehavior)        
-            {
-                UserTaskActivityBehavior uta = (UserTaskActivityBehavior) actImpl.getActivityBehavior();
-                TaskFormHandler handler = uta.getTaskDefinition().getTaskFormHandler();
-                if(handler != null && handler instanceof DefaultTaskFormHandler)
-                {
-                    // We cast to DefaultTaskFormHandler since we do not configure our own
-                    return ((DefaultTaskFormHandler)handler).getFormKey().getExpressionText();
-                }
-                
-            }
-        }
-        return null;
-    }
 
-    private boolean isReceiveTask(PvmActivity act)
+    private boolean isReceiveTask(FlowElement act)
     {
         if(act instanceof ActivityImpl) 
         {
@@ -746,7 +720,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
         return false;
     }
 
-    private boolean isFirstActivity(PvmActivity activity, ProcessDefinition procDef)
+    private boolean isFirstActivity(FlowElement activity, ProcessDefinition procDef)
     {
         if(procDef.getInitial().getOutgoingTransitions().size() == 1) 
         {
@@ -876,7 +850,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
             
             if(activeActivityIds.size() == 1)
             {
-                PvmActivity targetActivity = def.findActivity(activeActivityIds.get(0));
+                FlowElement targetActivity = def.findActivity(activeActivityIds.get(0));
                 if(targetActivity != null)
                 {
                     // Only get tasks of active activity is a user-task 
@@ -1047,7 +1021,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
     {
         String execId = createLocalId(pathId);
         Execution oldExecution = activitiUtil.getExecution(execId);
-        runtimeService.signal(execId);
+        runtimeService.trigger(execId);
         Execution execution = activitiUtil.getExecution(execId);
         if(execution !=null)
         {
@@ -1479,11 +1453,11 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
         String currentActivity = ((ExecutionEntity)processInstance).getActivityId();
         
         ProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(processInstance.getProcessDefinitionId());
-        PvmActivity activity = procDef.findActivity(currentActivity);
+        FlowElement activity = repoService.getBpmnModel(procDef.getId()).getFlowElement(procDef.getKey());
         if(isReceiveTask(activity) && isFirstActivity(activity, procDef)) 
         {
             // Signal the process to start flowing, beginning from the recieve task
-            runtimeService.signal(processInstanceId);
+            runtimeService.trigger(processInstanceId);
             
             // It's possible the process has ended after signalling the receive task
         }
