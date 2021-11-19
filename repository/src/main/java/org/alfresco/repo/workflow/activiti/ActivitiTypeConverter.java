@@ -105,13 +105,12 @@ public class ActivitiTypeConverter
     
     public ActivitiTypeConverter(ProcessEngine processEngine, 
                 WorkflowObjectFactory factory,
-                RepositoryService repositoryService,
                 ActivitiPropertyConverter propertyConverter, boolean deployWorkflowsInTenant)
     {
         this.runtimeService = processEngine.getRuntimeService();
         this.historyService = processEngine.getHistoryService();
         this.factory = factory;
-        this.repositoryService = repositoryService;
+        this.repositoryService = processEngine.getRepositoryService();
         this.propertyConverter =propertyConverter;
         this.activitiUtil = new ActivitiUtil(processEngine, deployWorkflowsInTenant);
     }
