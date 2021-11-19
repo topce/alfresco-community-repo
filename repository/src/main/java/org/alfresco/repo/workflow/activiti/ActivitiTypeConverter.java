@@ -95,7 +95,6 @@ public class ActivitiTypeConverter
     private static final String DEFAULT_TRANSITION_KEY= "bpm_businessprocessmodel.transition";
     
     private final RuntimeService runtimeService;
-    private final FormService formService;
     private final HistoryService historyService;
     private final ActivitiPropertyConverter propertyConverter;
     private final WorkflowObjectFactory factory;
@@ -107,7 +106,6 @@ public class ActivitiTypeConverter
                 ActivitiPropertyConverter propertyConverter, boolean deployWorkflowsInTenant)
     {
         this.runtimeService = processEngine.getRuntimeService();
-        this.formService = processEngine.getFormService();
         this.historyService = processEngine.getHistoryService();
         this.factory = factory;
         this.propertyConverter =propertyConverter;
@@ -192,9 +190,11 @@ public class ActivitiTypeConverter
                     null, startTask);
     }
 
-    private StartFormData getStartFormData(final String definitionId, String processKey)
+    private FlowElement getStartFormData(final String definitionId, String processKey)
     {
-       return formService.getStartFormData(definitionId);
+        Process process = ProcessDefinitionUtil.getBpmnModel(definitionId)
+                                               .getProcessById(processKey);
+        return process.getInitialFlowElement();
     }
     
     public WorkflowTaskDefinition getTaskDefinition(PvmActivity activity, String taskFormKey, String processKey, boolean isStart)
@@ -313,7 +313,7 @@ public class ActivitiTypeConverter
 
         if (nodeIds != null && nodeIds.size() >= 1)
         {
-            ReadOnlyProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(instance.getProcessDefinitionId());
+            ProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(instance.getProcessDefinitionId());
             PvmActivity activity = procDef.findActivity(nodeIds.get(0));
             node = convert(activity);
         }
@@ -573,15 +573,16 @@ public class ActivitiTypeConverter
         
         // Convert start-event to start-task Node
         String definitionId = processInstance.getProcessDefinitionId();
-        ReadOnlyProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(definitionId);
+        ProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(definitionId);
         WorkflowNode startNode = convert(procDef.getInitial(), true);
         
         String key = ((ProcessDefinition)procDef).getKey();
-        StartFormData startFormData = getStartFormData(definitionId, key);
+        FlowElement startElement = getStartFormData(definitionId, key);
         String taskDefId = null;
-        if(startFormData != null) 
+        if(startElement instanceof StartEvent)
         {
-            taskDefId = startFormData.getFormKey();
+            StartEvent startEvent = (StartEvent) startElement;
+            taskDefId = startEvent.getFormKey();
         }
         WorkflowTaskDefinition taskDef = factory.createTaskDefinition(taskDefId, startNode, taskDefId, true);
         
@@ -659,7 +660,7 @@ public class ActivitiTypeConverter
         }
         
         // Convert start-event to start-task Node
-        ReadOnlyProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(historicProcessInstance.getProcessDefinitionId());
+        ProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(historicProcessInstance.getProcessDefinitionId());
         WorkflowNode startNode = convert(procDef.getInitial(), true);
         
         String taskDefId = activitiUtil.getStartFormKey(historicProcessInstance.getProcessDefinitionId());
@@ -732,7 +733,7 @@ public class ActivitiTypeConverter
          return path;
     }
     
-    public String getFormKey(PvmActivity act, ReadOnlyProcessDefinition processDefinition)
+    public String getFormKey(PvmActivity act, ProcessDefinition processDefinition)
     {
         if(act instanceof ActivityImpl) 
         {
@@ -772,7 +773,7 @@ public class ActivitiTypeConverter
 
     private WorkflowNode buildHistoricTaskWorkflowNode(HistoricTaskInstance historicTaskInstance) 
     {
-    	ReadOnlyProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(historicTaskInstance.getProcessDefinitionId());
+    	ProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(historicTaskInstance.getProcessDefinitionId());
     	PvmActivity taskActivity = procDef.findActivity(historicTaskInstance.getTaskDefinitionKey());
 		return convert(taskActivity);
 	}
@@ -824,7 +825,7 @@ public class ActivitiTypeConverter
     
     public String getWorkflowDefinitionName(String workflowDefinitionId)
     {
-    	ReadOnlyProcessDefinition def = activitiUtil.getDeployedProcessDefinition(workflowDefinitionId);
+    	ProcessDefinition def = activitiUtil.getDeployedProcessDefinition(workflowDefinitionId);
     	return ((ProcessDefinition) def).getKey();
     }
     
