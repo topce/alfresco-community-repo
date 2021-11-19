@@ -1873,6 +1873,14 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
              {
                  taskQuery.orderByTaskAssignee().desc();
              }
+             else if (orderByPart == WorkflowTaskQuery.OrderBy.TaskCreated_Asc)
+             {
+                 // taskQuery.orderByHistoricActivityInstanceStartTime().asc();
+             }
+             else if (orderByPart == WorkflowTaskQuery.OrderBy.TaskCreated_Desc)
+             {
+                 // taskQuery.orderByHistoricActivityInstanceStartTime().desc();
+             }
              else if (orderByPart == WorkflowTaskQuery.OrderBy.TaskDue_Asc)
              {
                  // TODO: order by dueDate? It's a task-variable
