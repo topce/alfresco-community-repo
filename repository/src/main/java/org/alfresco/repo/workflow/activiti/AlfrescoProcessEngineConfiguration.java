@@ -30,8 +30,6 @@ import java.util.List;
 
 import org.activiti.engine.impl.jobexecutor.AsyncContinuationJobHandler;
 import org.activiti.engine.impl.jobexecutor.JobHandler;
-import org.activiti.engine.impl.jobexecutor.TimerCatchIntermediateEventJobHandler;
-import org.activiti.engine.impl.jobexecutor.TimerExecuteNestedActivityJobHandler;
 import org.activiti.engine.impl.variable.SerializableType;
 import org.activiti.engine.impl.variable.VariableType;
 import org.activiti.spring.SpringProcessEngineConfiguration;
