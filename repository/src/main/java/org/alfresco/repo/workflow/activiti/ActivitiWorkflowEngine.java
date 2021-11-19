@@ -67,8 +67,9 @@ import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.persistence.entity.TimerEntity;
+import org.activiti.engine.impl.persistence.entity.TimerJobEntity;
 import org.activiti.engine.impl.pvm.PvmActivity;
-import org.activiti.engine.impl.pvm.ReadOnlyProcessDefinition;
+import org.activiti.engine.impl.pvm.ProcessDefinition;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.impl.util.ProcessDefinitionUtil;
 import org.activiti.engine.repository.Deployment;
@@ -337,7 +338,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
      {
          try 
          {
-             String resourceName = GUID.generate() + BpmnDeployer.BPMN_RESOURCE_SUFFIXES[0];
+             String resourceName = GUID.generate() + "bpmn20.xml";
              
              Deployment deployment = repoService.createDeployment()
                  .addInputStream(resourceName, workflowDefinition)
@@ -611,7 +612,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
                throw new WorkflowException(messageService.getMessage(ERR_GET_DEF_UNEXISTING_IMAGE, workflowDefinitionId));
            }
            
-           String diagramResourceName = ((ReadOnlyProcessDefinition)processDefinition).getDiagramResourceName();
+           String diagramResourceName = ((ProcessDefinition)processDefinition).getDiagramResourceName();
            if(diagramResourceName != null)
            {
                ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -686,7 +687,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
         String processDefinitionId = createLocalId(workflowDefinitionId);
         
         // This should return all task definitions, including the start-task
-        ReadOnlyProcessDefinition processDefinition =((RepositoryServiceImpl)repoService).getDeployedProcessDefinition(processDefinitionId);
+        ProcessDefinition processDefinition =((RepositoryServiceImpl)repoService).getDeployedProcessDefinition(processDefinitionId);
 
         String processName = ((ProcessDefinition)processDefinition).getKey();
         factory.checkDomain(processName);
@@ -745,7 +746,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
         return false;
     }
 
-    private boolean isFirstActivity(PvmActivity activity, ReadOnlyProcessDefinition procDef)
+    private boolean isFirstActivity(PvmActivity activity, ProcessDefinition procDef)
     {
         if(procDef.getInitial().getOutgoingTransitions().size() == 1) 
         {
@@ -868,9 +869,9 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
 
     private WorkflowTask getTaskForTimer(Job job, ProcessInstance processInstance, Execution jobExecution) 
     {
-        if (job instanceof TimerEntity) 
+        if (job instanceof TimerJobEntity)
         {
-            ReadOnlyProcessDefinition def = activitiUtil.getDeployedProcessDefinition(processInstance.getProcessDefinitionId());
+            ProcessDefinition def = activitiUtil.getDeployedProcessDefinition(processInstance.getProcessDefinitionId());
             List<String> activeActivityIds = runtimeService.getActiveActivityIds(jobExecution.getId());
             
             if(activeActivityIds.size() == 1)
@@ -1477,7 +1478,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
         ProcessInstance processInstance = activitiUtil.getProcessInstance(processInstanceId);
         String currentActivity = ((ExecutionEntity)processInstance).getActivityId();
         
-        ReadOnlyProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(processInstance.getProcessDefinitionId());
+        ProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(processInstance.getProcessDefinitionId());
         PvmActivity activity = procDef.findActivity(currentActivity);
         if(isReceiveTask(activity) && isFirstActivity(activity, procDef)) 
         {

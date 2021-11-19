@@ -57,7 +57,7 @@ public class AlfrescoProcessEngineConfiguration extends SpringProcessEngineConfi
     }
     
     @Override
-    protected void initVariableTypes()
+    public void initVariableTypes()
     {
         super.initVariableTypes();
         // Add custom types before SerializableType
@@ -76,27 +76,27 @@ public class AlfrescoProcessEngineConfiguration extends SpringProcessEngineConfi
         variableTypes.addType(new CustomStringVariableType(), stringIndex);
     }
     
-    @Override
-    protected void initJobExecutor() 
-    {
-        super.initJobExecutor();
-
-        // Wrap timer-job handler to handle authentication
-        JobHandler timerJobHandler = jobHandlers.get(TimerExecuteNestedActivityJobHandler.TYPE);
-        JobHandler wrappingTimerJobHandler = new AuthenticatedTimerJobHandler(timerJobHandler, unprotectedNodeService);
-        jobHandlers.put(TimerExecuteNestedActivityJobHandler.TYPE, wrappingTimerJobHandler);
-        
-        // Wrap async-job handler to handle authentication
-        JobHandler asyncJobHandler = jobHandlers.get(AsyncContinuationJobHandler.TYPE);
-        JobHandler wrappingAsyncJobHandler = new AuthenticatedAsyncJobHandler(asyncJobHandler);
-        jobHandlers.put(AsyncContinuationJobHandler.TYPE, wrappingAsyncJobHandler);
-        
-        // Wrap intermediate-timer-job handler to handle authentication
-        JobHandler intermediateJobHandler = jobHandlers.get(TimerCatchIntermediateEventJobHandler.TYPE);
-        JobHandler wrappingIntermediateJobHandler = new AuthenticatedAsyncJobHandler(intermediateJobHandler);
-        jobHandlers.put(TimerCatchIntermediateEventJobHandler.TYPE, wrappingIntermediateJobHandler);
-        
-    }
+//    @Override
+//    protected void initJobExecutor()
+//    {
+//        super.initJobExecutor();
+//
+//        // Wrap timer-job handler to handle authentication
+//        JobHandler timerJobHandler = jobHandlers.get(TimerExecuteNestedActivityJobHandler.TYPE);
+//        JobHandler wrappingTimerJobHandler = new AuthenticatedTimerJobHandler(timerJobHandler, unprotectedNodeService);
+//        jobHandlers.put(TimerExecuteNestedActivityJobHandler.TYPE, wrappingTimerJobHandler);
+//
+//        // Wrap async-job handler to handle authentication
+//        JobHandler asyncJobHandler = jobHandlers.get(AsyncContinuationJobHandler.TYPE);
+//        JobHandler wrappingAsyncJobHandler = new AuthenticatedAsyncJobHandler(asyncJobHandler);
+//        jobHandlers.put(AsyncContinuationJobHandler.TYPE, wrappingAsyncJobHandler);
+//
+//        // Wrap intermediate-timer-job handler to handle authentication
+//        JobHandler intermediateJobHandler = jobHandlers.get(TimerCatchIntermediateEventJobHandler.TYPE);
+//        JobHandler wrappingIntermediateJobHandler = new AuthenticatedAsyncJobHandler(intermediateJobHandler);
+//        jobHandlers.put(TimerCatchIntermediateEventJobHandler.TYPE, wrappingIntermediateJobHandler);
+//
+//    }
     
     public void setCustomTypes(List<VariableType> customTypes)
     {
