@@ -40,6 +40,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.activiti.bpmn.model.FlowElement;
+import org.activiti.bpmn.model.Process;
+import org.activiti.bpmn.model.StartEvent;
 import org.activiti.engine.FormService;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.ProcessEngine;
@@ -168,15 +171,19 @@ public class ActivitiTypeConverter
         String defName = definition.getKey();
         int version = definition.getVersion();
         String defaultTitle = definition.getName();
-        
+
         String startTaskName = null;
-        StartFormData startFormData = getStartFormData(defId, defName);
-        if(startFormData != null) 
+        Process process = ProcessDefinitionUtil.getBpmnModel(defId)
+                    .getProcessById(defName);
+        FlowElement startElement = process.getInitialFlowElement();
+        if(startElement instanceof StartEvent)
         {
-            startTaskName = startFormData.getFormKey();
+            StartEvent startEvent = (StartEvent) startElement;
+            startTaskName = startEvent.getFormKey();
         }
-        
-        ReadOnlyProcessDefinition def = activitiUtil.getDeployedProcessDefinition(defId);
+
+
+        ProcessDefinition def = activitiUtil.getDeployedProcessDefinition(defId);
         PvmActivity startEvent = def.getInitial();
         WorkflowTaskDefinition startTask = getTaskDefinition(startEvent, startTaskName, definition.getKey(), true);
         
@@ -865,7 +872,7 @@ public class ActivitiTypeConverter
         }
     }
     
-    private boolean isUserTask(PvmActivity currentActivity)
+    private boolean isUserTask(ActivityImpl currentActivity)
     {
         // TODO: Validate if this is the best way to find out an activity is a usertask
         String type = (String) currentActivity.getProperty(ActivitiConstants.NODE_TYPE);

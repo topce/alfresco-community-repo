@@ -28,19 +28,18 @@ package org.alfresco.repo.workflow.activiti;
 
 import java.util.Map;
 
-import org.activiti.engine.FormService;
+import org.activiti.bpmn.model.FlowElement;
+import org.activiti.bpmn.model.Process;
+import org.activiti.bpmn.model.StartEvent;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
-import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
-import org.activiti.engine.impl.RepositoryServiceImpl;
-import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityImpl;
 import org.activiti.engine.impl.util.ProcessDefinitionUtil;
 import org.activiti.engine.repository.ProcessDefinition;
@@ -60,7 +59,6 @@ public class ActivitiUtil
     private final RuntimeService runtimeService;
     private final HistoryService historyService;
     private final TaskService taskService;
-    private final FormService formService;
     private final ManagementService managementService;
     private boolean deployWorkflowsInTenant;
     private boolean retentionHistoricProcessInstance;
@@ -71,7 +69,6 @@ public class ActivitiUtil
         this.runtimeService = engine.getRuntimeService();
         this.taskService = engine.getTaskService();
         this.historyService = engine.getHistoryService();
-        this.formService = engine.getFormService();
         this.managementService = engine.getManagementService();
         this.deployWorkflowsInTenant = deployWorkflowsInTenant;
     }
@@ -82,7 +79,6 @@ public class ActivitiUtil
         this.runtimeService = engine.getRuntimeService();
         this.taskService = engine.getTaskService();
         this.historyService = engine.getHistoryService();
-        this.formService = engine.getFormService();
         this.managementService = engine.getManagementService();
         this.deployWorkflowsInTenant = deployWorkflowsInTenant;
         this.retentionHistoricProcessInstance = retentionHistoricProcessInstance;
@@ -139,13 +135,6 @@ public class ActivitiUtil
             .executionId(id)
             .singleResult();
     }
-//
-//    public ReadOnlyProcessDefinition getDeployedProcessDefinition(String processDefinitionId)
-//    {
-//        // Currently, getDeployedProcessDefinition is still experimental and not exposed on
-//        // RepositoryService interface
-//        return ((RepositoryServiceImpl)repoService).getDeployedProcessDefinition(processDefinitionId);
-//    }
 
     public ProcessDefinition getDeployedProcessDefinition(String processDefinitionId){
         return ProcessDefinitionUtil.getProcessDefinitionFromDatabase(processDefinitionId);
@@ -159,26 +148,21 @@ public class ActivitiUtil
     
     public String getStartTaskTypeName(String processDefinitionId)
     {
-        String startTaskName = null;
-        StartFormData startFormData = formService.getStartFormData(processDefinitionId);
-        if (startFormData != null) 
-        {
-            startTaskName = startFormData.getFormKey();
+        String formKey = null;
+        ProcessDefinition processDefinition = repoService.getProcessDefinition(processDefinitionId);
+        Process process = repoService.getBpmnModel(processDefinition.getId())
+                    .getProcessById(processDefinition.getKey());
+        FlowElement startElement = process.getInitialFlowElement();
+        if (startElement instanceof StartEvent) {
+            StartEvent startEvent = (StartEvent) startElement;
+            formKey = startEvent.getFormKey();
         }
-        return startTaskName;
+        return formKey;
     }
 
     public Map<String, Object> getExecutionVariables(String executionId)
     {
         return runtimeService.getVariables(executionId);
-    }
-
-    /**
-     * @return the formService
-     */
-    public FormService getFormService()
-    {
-        return formService;
     }
     
     /**
