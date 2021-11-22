@@ -1019,7 +1019,7 @@ public class SchemaBootstrap extends AbstractLifecycleBean
                 setDatabaseSchemaUpdate("none").
                 setProcessEngineName("activitiBootstrapEngine").
                 setHistory("full").
-                setJobExecutorActivate(false).
+                setAsyncExecutorActivate(false).
                 buildProcessEngine();
 
             String schemaName = dbSchemaName != null ? dbSchemaName : databaseMetaDataHelper.getSchema(connection);

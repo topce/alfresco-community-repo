@@ -43,7 +43,6 @@ import java.util.Set;
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.StartEvent;
-import org.activiti.engine.FormService;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RepositoryService;
@@ -477,13 +476,8 @@ public class ActivitiTypeConverter
         	// Since the task is active, it's safe to use the active node on
             // the execution path
             WorkflowNode node = path.getNode();
-            
-            TaskFormData taskFormData =formService.getTaskFormData(task.getId());
-            String taskDefId = null;
-            if(taskFormData != null) 
-            {
-                taskDefId = taskFormData.getFormKey();
-            }
+
+            String taskDefId = task.getFormKey();
             WorkflowTaskDefinition taskDef = factory.createTaskDefinition(taskDefId, node, taskDefId, false);
             
             // All task-properties should be fetched, not only local
@@ -743,15 +737,15 @@ public class ActivitiTypeConverter
     
     public String getFormKey(FlowElement act, ProcessDefinition processDefinition)
     {
-        if(act instanceof ActivityImpl) 
+        if(act instanceof ActivityImpl)
         {
             ActivityImpl actImpl = (ActivityImpl) act;
-            if (actImpl.getActivityBehavior() instanceof UserTaskActivityBehavior)        
+            if (actImpl.getActivityBehavior() instanceof UserTaskActivityBehavior)
             {
             	UserTaskActivityBehavior uta = (UserTaskActivityBehavior) actImpl.getActivityBehavior();
                 return getFormKey(uta.getTaskDefinition());
             }
-            else if(actImpl.getActivityBehavior() instanceof MultiInstanceActivityBehavior) 
+            else if(actImpl.getActivityBehavior() instanceof MultiInstanceActivityBehavior)
             {
             	// Get the task-definition from the process-definition
             	if(processDefinition instanceof ProcessDefinitionEntity)
@@ -767,8 +761,8 @@ public class ActivitiTypeConverter
         }
         return null;
     }
-    
-    private String getFormKey(TaskDefinition taskDefinition) 
+
+    private String getFormKey(TaskDefinition taskDefinition)
     {
     	 TaskFormHandler handler = taskDefinition.getTaskFormHandler();
          if(handler != null && handler instanceof DefaultTaskFormHandler)
