@@ -43,7 +43,7 @@ import org.alfresco.repo.invitation.WorkflowModelModeratedInvitation;
 public class RejectModeratedInviteDelegate extends AbstractInvitationDelegate
 {
     @Override
-    public void execute(DelegateExecution execution) throws Exception
+    public void execute(DelegateExecution execution)
     {
         Map<String, Object> vars = execution.getVariables();
         String siteName = (String) vars.get(WorkflowModelModeratedInvitation.wfVarResourceName);

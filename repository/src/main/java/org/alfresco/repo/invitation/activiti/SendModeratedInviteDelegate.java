@@ -66,7 +66,7 @@ public class SendModeratedInviteDelegate extends AbstractInvitationDelegate
     }
 
     @Override
-    public void execute(DelegateExecution execution) throws Exception
+    public void execute(DelegateExecution execution)
     {
         String invitationId = ActivitiConstants.ENGINE_ID + "$" + execution.getProcessInstanceId();
         Map<String, Object> variables = execution.getVariables();

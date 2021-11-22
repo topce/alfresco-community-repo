@@ -41,7 +41,7 @@ public class AcceptNominatedInviteDelegate extends AbstractInvitationDelegate
 {
 
     @Override
-    public void execute(DelegateExecution execution) throws Exception
+    public void execute(DelegateExecution execution)
     {
         Map<String, Object> executionVariables = execution.getVariables();
         String invitee = (String) executionVariables.get(WorkflowModelNominatedInvitation.wfVarInviteeUserName);

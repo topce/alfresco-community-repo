@@ -41,7 +41,7 @@ import org.activiti.engine.delegate.JavaDelegate;
 public class PerformResetPasswordDelegate extends AbstractResetPasswordDelegate
 {
     @Override
-    public void execute(DelegateExecution execution) throws Exception
+    public void execute(DelegateExecution execution)
     {
         resetPasswordService.performResetPassword(execution);
     }
