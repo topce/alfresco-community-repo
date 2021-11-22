@@ -37,9 +37,10 @@
  */
 package org.alfresco.repo.workflow.activiti;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.activiti.bpmn.model.ActivitiListener;
 import org.activiti.bpmn.model.BaseElement;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.engine.delegate.TaskListener;
@@ -47,8 +48,6 @@ import org.activiti.engine.impl.bpmn.behavior.MultiInstanceActivityBehavior;
 import org.activiti.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
 import org.activiti.engine.impl.bpmn.parser.BpmnParse;
 import org.activiti.engine.impl.bpmn.parser.handler.AbstractBpmnParseHandler;
-import org.activiti.engine.impl.pvm.delegate.ActivityBehavior;
-import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.parse.BpmnParseHandler;
 
 /**
@@ -72,35 +71,33 @@ public class AlfrescoUserTaskBpmnParseHandler extends AbstractBpmnParseHandler<U
 
     protected void executeParse(BpmnParse bpmnParse, UserTask userTask)
     {
-        ActivityImpl activity = findActivity(bpmnParse, userTask.getId());
-        ActivityBehavior activitybehaviour = activity.getActivityBehavior();
-        if (activitybehaviour instanceof UserTaskActivityBehavior)
+        if (userTask.getBehavior() instanceof UserTaskActivityBehavior)
         {
-            addListeners((UserTaskActivityBehavior) activity.getActivityBehavior());
+            addListeners(userTask);
         } 
-        else if(activitybehaviour instanceof MultiInstanceActivityBehavior) 
+        else if(userTask.getBehavior() instanceof MultiInstanceActivityBehavior)
         {
-            MultiInstanceActivityBehavior multiInstance = (MultiInstanceActivityBehavior) activitybehaviour;
+            MultiInstanceActivityBehavior multiInstance = (MultiInstanceActivityBehavior) userTask.getBehavior();
             if(multiInstance.getInnerActivityBehavior() instanceof UserTaskActivityBehavior) 
             {
-                addListeners((UserTaskActivityBehavior) multiInstance.getInnerActivityBehavior());
+                addListeners(userTask);
             }
         }
     }
     
-    protected void addListeners(UserTaskActivityBehavior activityBehavior) 
+    protected void addListeners(UserTask userTask)
     {
         if (createTaskListener != null)
         {
-            addTaskListenerAsFirst(createTaskListener, TaskListener.EVENTNAME_CREATE, activityBehavior);
+            addTaskListenerAsFirst(createTaskListener, TaskListener.EVENTNAME_CREATE, userTask);
         }
         if (completeTaskListener != null)
         {
-            addTaskListenerAsFirst(completeTaskListener, TaskListener.EVENTNAME_COMPLETE, activityBehavior);
+            addTaskListenerAsFirst(completeTaskListener, TaskListener.EVENTNAME_COMPLETE, userTask);
         }
         if(notificationTaskListener != null)
         {
-            addTaskListenerAsLast(notificationTaskListener, TaskListener.EVENTNAME_CREATE, activityBehavior);
+            addTaskListenerAsLast(notificationTaskListener, TaskListener.EVENTNAME_CREATE, userTask);
         }
     }
     
@@ -119,22 +116,27 @@ public class AlfrescoUserTaskBpmnParseHandler extends AbstractBpmnParseHandler<U
         this.notificationTaskListener = notificationTaskListener;
     }
     
-    protected void addTaskListenerAsFirst(TaskListener taskListener, String eventName, UserTaskActivityBehavior userTask) 
+    protected void addTaskListenerAsFirst(TaskListener taskListener, String eventName, UserTask userTask)
     {
         getOrCreateListenerList(eventName, userTask).add(0, taskListener);
     }
     
-    protected void addTaskListenerAsLast(TaskListener taskListener, String eventName, UserTaskActivityBehavior userTask) 
+    protected void addTaskListenerAsLast(TaskListener taskListener, String eventName, UserTask userTask)
     {
         getOrCreateListenerList(eventName, userTask).add(taskListener);
     }
     
-    protected List<TaskListener> getOrCreateListenerList(String eventName, UserTaskActivityBehavior userTask) 
+    protected List<TaskListener> getOrCreateListenerList(String eventName, UserTask userTask)
     {
-        List<TaskListener> taskEventListeners = userTask.getTaskDefinition().getTaskListeners().get(eventName);
-        if (taskEventListeners == null) {
-          taskEventListeners = new ArrayList<TaskListener>();
-          userTask.getTaskDefinition().getTaskListeners().put(eventName, taskEventListeners);
+        List<TaskListener> taskEventListeners = userTask.getTaskListeners().stream()
+                    .filter(listener -> eventName.equals(listener.getEvent()))
+                    .map(listener -> (TaskListener) listener.getInstance())
+                    .collect(Collectors.toList());
+
+        if (taskEventListeners.isEmpty()) {
+            ActivitiListener activitiListener = new ActivitiListener();
+            activitiListener.setEvent(eventName);
+            userTask.getTaskListeners().add(activitiListener);
         }
         return taskEventListeners;
     }
