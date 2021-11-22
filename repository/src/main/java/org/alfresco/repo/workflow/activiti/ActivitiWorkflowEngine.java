@@ -41,8 +41,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.FlowElement;
+import org.activiti.bpmn.model.*;
 import org.activiti.bpmn.model.Process;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.HistoryService;
@@ -58,7 +57,6 @@ import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
 import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.bpmn.behavior.ReceiveTaskActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
 import org.activiti.engine.impl.context.Context;
 import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.interceptor.CommandContext;
@@ -713,24 +711,20 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
 
     private boolean isReceiveTask(FlowElement act)
     {
-        if(act instanceof ActivityImpl) 
+        if(act instanceof UserTask)
         {
-            ActivityImpl actImpl = (ActivityImpl) act;
-            return (actImpl.getActivityBehavior() instanceof ReceiveTaskActivityBehavior);        
+            UserTask userTask = (UserTask) act;
+            return (userTask.getBehavior() instanceof ReceiveTaskActivityBehavior);
+
         }
         return false;
     }
 
     private boolean isFirstActivity(FlowElement activity, ProcessDefinition procDef)
     {
-        if(procDef.getInitial().getOutgoingTransitions().size() == 1)
-        {
-            if (procDef.getInitial().getOutgoingTransitions().get(0).getDestination().equals(activity))
-            {
-                return true;
-            }
-        }
-        return false;
+        return activity.equals(repoService.getBpmnModel(procDef.getId())
+                    .getProcessById(procDef.getKey())
+                    .getInitialFlowElement());
     }
 
     /**
@@ -856,8 +850,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
                 if(targetActivity != null)
                 {
                     // Only get tasks of active activity is a user-task 
-                    String activityType = (String) targetActivity.getProperty(ActivitiConstants.NODE_TYPE);
-                    if(ActivitiConstants.USER_TASK_NODE_TYPE.equals(activityType))
+                    if(targetActivity instanceof UserTask)
                     {
                         Task task = taskService.createTaskQuery().executionId(job.getExecutionId()).singleResult();
                         return typeConverter.convert(task);
@@ -1198,8 +1191,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
             if (model != null && model.getLocationMap().size() > 0) 
             {              
                 ProcessDiagramGenerator generator = new DefaultProcessDiagramGenerator();
-                return generator.generateDiagram(model,
-                      ActivitiConstants.PROCESS_INSTANCE_IMAGE_FORMAT,
+                return generator.generateDiagram(model, Collections.singletonList(ActivitiConstants.PROCESS_INSTANCE_IMAGE_FORMAT),
                       runtimeService.getActiveActivityIds(processInstanceId)); 
             }
         }
