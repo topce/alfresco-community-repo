@@ -44,7 +44,7 @@ public class SendResetPasswordEmailDelegate extends AbstractResetPasswordDelegat
     private static final String EMAIL_TEMPLATE_PATH = "alfresco/templates/reset-password-email-templates/reset-password-email-template.ftl";
 
     @Override
-    public void execute(DelegateExecution execution) throws Exception
+    public void execute(DelegateExecution execution)
     {
         resetPasswordService.sendResetPasswordEmail(execution, EMAIL_TEMPLATE_PATH, EMAIL_SUBJECT_KEY);
     }

@@ -45,7 +45,7 @@ public class SendNominatedInviteDelegate extends AbstractInvitationDelegate
             "invitation.invitesender.email.subject";
 
     @Override
-    public void execute(DelegateExecution execution) throws Exception
+    public void execute(DelegateExecution execution)
     {
         String invitationId = ActivitiConstants.ENGINE_ID + "$" + execution.getProcessInstanceId();
         Map<String, Object> variables = execution.getVariables();

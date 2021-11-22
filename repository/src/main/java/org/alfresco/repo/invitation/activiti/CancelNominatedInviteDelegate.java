@@ -44,7 +44,7 @@ import org.alfresco.repo.workflow.activiti.ActivitiConstants;
 public class CancelNominatedInviteDelegate extends AbstractInvitationDelegate
 {
     @Override
-    public void execute(DelegateExecution execution) throws Exception
+    public void execute(DelegateExecution execution)
     {
         Map<String, Object> executionVariables = execution.getVariables();
         String currentInviteId = ActivitiConstants.ENGINE_ID + "$" + execution.getProcessInstanceId();

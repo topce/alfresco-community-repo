@@ -39,7 +39,7 @@ import org.alfresco.repo.workflow.activiti.ActivitiConstants;
 public class RejectNominatedInviteDelegate extends AbstractInvitationDelegate
 {
     @Override
-    public void execute(DelegateExecution execution) throws Exception
+    public void execute(DelegateExecution execution)
     {
         // Get the invitee user name
         String invitee = (String) execution.getVariable(WorkflowModelNominatedInvitation.wfVarInviteeUserName);
