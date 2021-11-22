@@ -40,9 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.activiti.bpmn.model.FlowElement;
+import org.activiti.bpmn.model.*;
 import org.activiti.bpmn.model.Process;
-import org.activiti.bpmn.model.StartEvent;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RepositoryService;
@@ -875,26 +874,15 @@ public class ActivitiTypeConverter
             }
         }
     }
-    
-    private boolean isUserTask(ActivityImpl currentActivity)
+
+    private boolean isUserTask(FlowElement currentActivity)
     {
-        // TODO: Validate if this is the best way to find out an activity is a usertask
-        String type = (String) currentActivity.getProperty(ActivitiConstants.NODE_TYPE);
-        if(type != null && type.equals(ActivitiConstants.USER_TASK_NODE_TYPE))
-        {
-            return true;
-        }
-        return false;
+        return currentActivity instanceof UserTask;
     }
-    
-    private boolean isSubProcess(PvmActivity currentActivity)
+
+    private boolean isSubProcess(FlowElement currentActivity)
     {
-        String type = (String) currentActivity.getProperty(ActivitiConstants.NODE_TYPE);
-        if(type != null && type.equals(ActivitiConstants.SUB_PROCESS_NODE_TYPE))
-        {
-            return true;
-        }
-        return false;
+        return currentActivity instanceof SubProcess;
     }
 
     public WorkflowInstance convert(HistoricProcessInstance historicProcessInstance)
