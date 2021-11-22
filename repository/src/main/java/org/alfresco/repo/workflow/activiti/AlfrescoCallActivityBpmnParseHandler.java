@@ -42,8 +42,7 @@ import org.activiti.bpmn.model.CallActivity;
 import org.activiti.engine.impl.bpmn.behavior.CallActivityBehavior;
 import org.activiti.engine.impl.bpmn.parser.BpmnParse;
 import org.activiti.engine.impl.bpmn.parser.handler.AbstractBpmnParseHandler;
-import org.activiti.engine.impl.pvm.delegate.ActivityBehavior;
-import org.activiti.engine.impl.pvm.process.ActivityImpl;
+import org.activiti.engine.impl.delegate.ActivityBehavior;
 import org.activiti.engine.parse.BpmnParseHandler;
 import org.alfresco.repo.tenant.TenantService;
 
@@ -69,8 +68,8 @@ public class AlfrescoCallActivityBpmnParseHandler extends AbstractBpmnParseHandl
     {
         if (multiTenancyEnabled && tenantService.isEnabled())
         {
-            ActivityImpl activity = findActivity(bpmnParse, callActivity.getId());
-            ActivityBehavior activityBehavior = activity.getActivityBehavior();
+            ActivityBehavior activityBehavior = (ActivityBehavior) callActivity.getBehavior();
+
             if(activityBehavior instanceof CallActivityBehavior)
             {
                 CallActivityBehavior callActivityBehavior = (CallActivityBehavior) activityBehavior;
