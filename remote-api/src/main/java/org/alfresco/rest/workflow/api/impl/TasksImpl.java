@@ -35,11 +35,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.activiti.bpmn.model.FlowElement;
+import org.activiti.bpmn.model.Process;
+import org.activiti.bpmn.model.StartEvent;
 import org.activiti.engine.ActivitiTaskAlreadyClaimedException;
-import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
 import org.activiti.engine.history.HistoricVariableInstance;
+import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.IdentityLinkType;
@@ -289,9 +292,9 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
             if (processDefinitionKeyLike != null) query.processDefinitionKeyLike(processDefinitionKeyLike);
             if (processDefinitionName != null) query.processDefinitionName(processDefinitionName);
             if (processDefinitionNameLike != null) query.processDefinitionNameLike(processDefinitionNameLike);
-            if (dueAt != null) query.dueDate(dueAt);
-            if (dueAtGreaterThan != null) query.dueAfter(dueAtGreaterThan);
-            if (dueAtLessThan != null) query.dueBefore(dueAtLessThan);
+//            if (dueAt != null) query.dueDate(dueAt);
+//            if (dueAtGreaterThan != null) query.dueAfter(dueAtGreaterThan);
+//            if (dueAtLessThan != null) query.dueBefore(dueAtLessThan);
             if (startedAt != null) query.taskCreatedOn(startedAt);
             if (startedAtGreaterThan != null) query.taskCreatedAfter(startedAtGreaterThan);
             if (startedAtLessThan != null) query.taskCreatedBefore(startedAtLessThan);
@@ -543,10 +546,16 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
         {
             if (definitionTypeMap.containsKey(task.getProcessDefinitionId()) == false)
             {
-                StartFormData startFormData = activitiProcessEngine.getFormService().getStartFormData(task.getProcessDefinitionId());
-                if (startFormData != null)
+                ProcessDefinition processDefinition =
+                            activitiProcessEngine.getRepositoryService().getProcessDefinition(task.getProcessDefinitionId());
+                Process process = activitiProcessEngine.getRepositoryService()
+                            .getBpmnModel(processDefinition.getId())
+                            .getProcessById(processDefinition.getKey());
+                FlowElement startElement = process.getInitialFlowElement();
+                if (startElement instanceof StartEvent)
                 {
-                    String formKey = startFormData.getFormKey();
+                    StartEvent startEvent = (StartEvent) startElement;
+                    String formKey = startEvent.getFormKey();
                     definitionTypeMap.put(task.getProcessDefinitionId(), getWorkflowFactory().getTaskFullTypeDefinition(formKey, true));
                 }
             }
@@ -952,10 +961,16 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
         // Convert raw variables to TaskVariables
         TypeDefinition taskTypeDefinition = getWorkflowFactory().getTaskFullTypeDefinition(formKey, false);
         TypeDefinition startFormTypeDefinition = null;
-        StartFormData startFormData = activitiProcessEngine.getFormService().getStartFormData(taskInstance.getProcessDefinitionId());
-        if (startFormData != null)
+        ProcessDefinition processDefinition =
+                    activitiProcessEngine.getRepositoryService().getProcessDefinition(taskInstance.getProcessDefinitionId());
+        Process process = activitiProcessEngine.getRepositoryService()
+                    .getBpmnModel(processDefinition.getId())
+                    .getProcessById(processDefinition.getKey());
+        FlowElement startElement = process.getInitialFlowElement();
+        if (startElement instanceof StartEvent)
         {
-            startFormTypeDefinition = getWorkflowFactory().getTaskFullTypeDefinition(startFormData.getFormKey(), true);
+            StartEvent startEvent = (StartEvent) startElement;
+            startFormTypeDefinition = getWorkflowFactory().getTaskFullTypeDefinition(startEvent.getFormKey(), true);
         }
         else
         {
@@ -1030,10 +1045,16 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
         {
             // Get start-task definition for explicit typing of variables submitted at the start
             String formKey = null;
-            StartFormData startFormData = activitiProcessEngine.getFormService().getStartFormData(taskInstance.getProcessDefinitionId());
-            if (startFormData != null)
+            ProcessDefinition processDefinition =
+                        activitiProcessEngine.getRepositoryService().getProcessDefinition(taskInstance.getProcessDefinitionId());
+            Process process = activitiProcessEngine.getRepositoryService()
+                        .getBpmnModel(processDefinition.getId())
+                        .getProcessById(processDefinition.getKey());
+            FlowElement startElement = process.getInitialFlowElement();
+            if (startElement instanceof StartEvent)
             {
-                formKey = startFormData.getFormKey();
+                StartEvent startEvent = (StartEvent) startElement;
+                formKey = startEvent.getFormKey();
             }
             
             TypeDefinition startTaskTypeDefinition = getWorkflowFactory().getTaskFullTypeDefinition(formKey, true);
@@ -1056,7 +1077,18 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
             // Revert to either the content-model type or the raw type provided by the request
             try 
             {
-                String formKey = activitiProcessEngine.getFormService().getTaskFormKey(taskInstance.getProcessDefinitionId(), taskInstance.getTaskDefinitionKey());
+                ProcessDefinition processDefinition =
+                            activitiProcessEngine.getRepositoryService().getProcessDefinition(taskInstance.getProcessDefinitionId());
+                Process process = activitiProcessEngine.getRepositoryService()
+                            .getBpmnModel(processDefinition.getId())
+                            .getProcessById(processDefinition.getKey());
+                FlowElement startElement = process.getInitialFlowElement();
+                String formKey = null;
+                if (startElement instanceof StartEvent)
+                {
+                    StartEvent startEvent = (StartEvent) startElement;
+                    formKey = startEvent.getFormKey();
+                }
                 TypeDefinition typeDefinition = getWorkflowFactory().getTaskFullTypeDefinition(formKey, false);
                 context = new TypeDefinitionContext(typeDefinition, getQNameConverter());
                 if (context.getPropertyDefinition(taskVariable.getName()) != null) 
@@ -1221,8 +1253,21 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
     {
         if (task.getProcessDefinitionId() != null)
         {
-            String formKey = activitiProcessEngine.getFormService().getTaskFormKey(task.getProcessDefinitionId(), task.getTaskDefinitionKey());
-            return formKey;
+            ProcessDefinition processDefinition =
+                        activitiProcessEngine.getRepositoryService().getProcessDefinition(task.getProcessDefinitionId());
+            Process process = activitiProcessEngine.getRepositoryService()
+                        .getBpmnModel(processDefinition.getId())
+                        .getProcessById(processDefinition.getKey());
+            FlowElement startElement = process.getInitialFlowElement();
+            if (startElement instanceof StartEvent)
+            {
+                StartEvent startEvent = (StartEvent) startElement;
+                return startEvent.getFormKey();
+            }
+            else
+            {
+                return null;
+            }
         } 
         else 
         {
@@ -1457,7 +1502,7 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
                 }
                 else if ("dueAt".equalsIgnoreCase(sortColumn.column))
                 {
-                    query.orderByDueDate();
+//                    query.orderByDueDate();
                 }
             }
             else
@@ -1477,7 +1522,7 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
         }
         else
         {
-            query.orderByDueDate().asc();
+//            query.orderByDueDate().asc();
         }
     }
     
@@ -1665,7 +1710,6 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
     /**
      * Set bpm:outcome variable to the local variables of the specified task.
      * <br>The variables should be set separately via {@link org.activiti.engine.TaskService}
-     * @param localVariables The variable, that will be set to the task
      * @param taskId The id of the task
      */
     private void setOutcome(String taskId)
