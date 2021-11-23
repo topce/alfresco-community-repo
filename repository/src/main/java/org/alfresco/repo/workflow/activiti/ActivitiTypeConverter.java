@@ -46,21 +46,10 @@ import org.activiti.engine.HistoryService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
-import org.activiti.engine.form.StartFormData;
-import org.activiti.engine.form.TaskFormData;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
-import org.activiti.engine.impl.bpmn.behavior.MultiInstanceActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
-import org.activiti.engine.impl.form.DefaultTaskFormHandler;
-import org.activiti.engine.impl.form.TaskFormHandler;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityImpl;
-import org.activiti.engine.impl.pvm.PvmActivity;
-import org.activiti.engine.impl.pvm.PvmTransition;
-import org.activiti.engine.impl.pvm.ReadOnlyProcessDefinition;
-import org.activiti.engine.impl.pvm.process.ActivityImpl;
-import org.activiti.engine.impl.task.TaskDefinition;
 import org.activiti.engine.impl.util.ProcessDefinitionUtil;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
@@ -340,9 +329,9 @@ public class ActivitiTypeConverter
     {
         String name = activity.getId();
         // TODO: How to these properties from FlowElement ?
-         String defaultTitle = (String) activity.getProperty(ActivitiConstants.NODE_NAME);
-         String defaultDescription = (String) activity.getProperty(ActivitiConstants.NODE_DESCRIPTION);
-         String type = (String) activity.getProperty(ActivitiConstants.NODE_TYPE);
+         String defaultTitle = activity.getName();
+         String defaultDescription = activity.getDocumentation();
+         String type = activity.getName();
          boolean isTaskNode = forceIsTaskNode || ActivitiConstants.USER_TASK_NODE_TYPE.equals(type);
          
          if(defaultTitle == null)
