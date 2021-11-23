@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.impl.persistence.entity.TimerEntity;
+import org.activiti.engine.impl.persistence.entity.TimerJobEntity;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Job;
 import org.alfresco.model.ContentModel;
@@ -172,9 +172,11 @@ public class ActivitiTimerExecutionTest extends BaseSpringTest
     		String processInstanceId = BPMEngineRegistry.getLocalId(workflowInstance.getId());
     		
     		// Check the timer, should have "error" set in it
-    		TimerEntity timer =  (TimerEntity) activitiProcessEngine.getManagementService()
-    			.createJobQuery().timers()
-    			.processInstanceId(processInstanceId).singleResult();
+			activitiProcessEngine.getManagementService();
+
+			TimerJobEntity timer =  (TimerJobEntity) activitiProcessEngine.getManagementService()
+				.createJobQuery().timers()
+				.processInstanceId(processInstanceId).singleResult();
     		
     		int numberOfRetries = 5;
     		for (int i = 0; i < numberOfRetries; i++)
@@ -184,7 +186,7 @@ public class ActivitiTimerExecutionTest extends BaseSpringTest
     				break;
     			}
     			Thread.sleep(1000);
-    			timer =  (TimerEntity) activitiProcessEngine.getManagementService()
+    			timer =  (TimerJobEntity) activitiProcessEngine.getManagementService()
     				.createJobQuery().timers()
     				.processInstanceId(processInstanceId).singleResult();
     		}
