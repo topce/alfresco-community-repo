@@ -849,28 +849,26 @@ public class ActivitiTypeConverter
         if(!processedActivities.contains(currentActivity.getId()))
         {
             processedActivities.add(currentActivity.getId());
-            if(isUserTask(currentActivity)) 
+            if(isUserTask(currentActivity))
             {
                 userTasks.put(currentActivity.getId(), currentActivity);
             }
-            
+
             // Process outgoing transitions
-            if(currentActivity.getOutgoingTransitions() != null)
+            if(currentActivity.getSubProcess().getOutgoingFlows() != null)
             {
-                for(PvmTransition transition : currentActivity.getOutgoingTransitions())
+                for(SequenceFlow transition : currentActivity.getSubProcess().getOutgoingFlows())
                 {
-                    if(transition.getDestination() != null)
+                    if(transition.getSubProcess() != null)
                     {
-                        findUserTasks(transition.getDestination(), userTasks, processedActivities);
+                        findUserTasks(transition.getTargetFlowElement(), userTasks, processedActivities);
                     }
                 }
             }
 
             if (isSubProcess(currentActivity))
             {
-                Map<String, Object> properties = ((ActivityImpl)currentActivity).getProperties();
-                PvmActivity startEvent = (PvmActivity) properties.get(ActivitiConstants.PROP_INITIAL_ACTIVITY);
-                findUserTasks(startEvent, userTasks, processedActivities);
+                findUserTasks(currentActivity.getSubProcess(), userTasks, processedActivities);
             }
         }
     }

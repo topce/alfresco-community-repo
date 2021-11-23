@@ -69,7 +69,7 @@ public class AlfrescoProcessBpmnParseHandler extends AbstractBpmnParseHandler<Pr
     protected void executeParse(BpmnParse bpmnParse, Process process)
     {
         ProcessDefinitionEntity processDefinition = bpmnParse.getCurrentProcessDefinition();
-        processDefinition.addExecutionListener(ExecutionListener.EVENTNAME_START, processCreateListener);
+        //processDefinition.addExecutionListener(ExecutionListener.EVENTNAME_START, processCreateListener);
         if (multiTenancyEnabled && tenantService.isEnabled())
         {
             String key = tenantService.getName(processDefinition.getKey());
