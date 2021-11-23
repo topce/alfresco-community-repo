@@ -702,7 +702,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
         Collection<FlowElement> taskActivities = typeConverter.findUserTasks(startEvent);
         for(FlowElement act : taskActivities)
         {
-            String formKey = typeConverter.getFormKey(act, processDefinition);
+            String formKey = typeConverter.getFormKey(act);
             defs.add(typeConverter.getTaskDefinition(act, formKey, processDefinition.getId(), false));
         }
         
