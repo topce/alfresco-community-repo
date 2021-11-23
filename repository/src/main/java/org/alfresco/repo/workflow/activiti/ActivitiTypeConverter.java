@@ -234,14 +234,12 @@ public class ActivitiTypeConverter
                      .getBpmnModel(procDef.getId()).
                      getProcessById(procDef.getKey())
                      .getInitialFlowElement());
-    	 // TODO: To consider
-    	 TaskDefinition taskDefinition = null;
+
     	 for(FlowElement activity : userTasks)
     	 {
-    		 taskDefinition = procDef.getTaskDefinitions().get(activity.getId());
-    		 if(taskDefinitionKey.equals(taskDefinition.getKey()))
+    		 if(activity instanceof UserTask)
     		 {
-    			 String formKey = getFormKey(taskDefinition);
+    			 String formKey = getFormKey((UserTask) activity);
     			 WorkflowNode node = convert(activity);
     			 return factory.createTaskDefinition(formKey, node, formKey, false);
     		 }
@@ -734,41 +732,21 @@ public class ActivitiTypeConverter
          return path;
     }
     
-    public String getFormKey(FlowElement act, ProcessDefinition processDefinition)
+    public String getFormKey(FlowElement act)
     {
-        if(act instanceof ActivityImpl)
+        if(act instanceof UserTask)
         {
-            ActivityImpl actImpl = (ActivityImpl) act;
-            if (actImpl.getActivityBehavior() instanceof UserTaskActivityBehavior)
-            {
-            	UserTaskActivityBehavior uta = (UserTaskActivityBehavior) actImpl.getActivityBehavior();
-                return getFormKey(uta.getTaskDefinition());
-            }
-            else if(actImpl.getActivityBehavior() instanceof MultiInstanceActivityBehavior)
-            {
-            	// Get the task-definition from the process-definition
-            	if(processDefinition instanceof ProcessDefinitionEntity)
-            	{
-            		// Task definition id is the same the the activity id
-            		TaskDefinition taskDef = ((ProcessDefinitionEntity) processDefinition).getTaskDefinitions().get(act.getId());
-            		if(taskDef != null)
-            		{
-            			return getFormKey(taskDef);
-            		}
-            	}
-            }
+            UserTask actImpl = (UserTask) act;
+            return actImpl.getFormKey();
         }
         return null;
     }
 
-    private String getFormKey(TaskDefinition taskDefinition)
+    private String getFormKey(UserTask userTask)
     {
-    	 TaskFormHandler handler = taskDefinition.getTaskFormHandler();
-         if(handler != null && handler instanceof DefaultTaskFormHandler)
-         {
-             // We cast to DefaultTaskFormHandler since we do not configure our own
-             return ((DefaultTaskFormHandler)handler).getFormKey().getExpressionText();
-         }
+        if(userTask != null){
+            return userTask.getFormKey();
+        }
          return null;
     }
 
