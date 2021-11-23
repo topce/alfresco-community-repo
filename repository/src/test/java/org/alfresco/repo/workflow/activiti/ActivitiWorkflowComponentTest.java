@@ -489,7 +489,7 @@ public class ActivitiWorkflowComponentTest extends AbstractActivitiComponentTest
             Execution execution = runtime.createExecutionQuery()
                 .processInstanceId(completedId)
                 .singleResult();
-            runtime.signal(execution.getId());
+            runtime.trigger(execution.getId());
             ProcessInstance instance = runtime.createProcessInstanceQuery()
                 .processInstanceId(completedId)
                 .singleResult();
@@ -527,7 +527,7 @@ public class ActivitiWorkflowComponentTest extends AbstractActivitiComponentTest
             Execution execution = runtime.createExecutionQuery()
             .processInstanceId(completedId)
             .singleResult();
-            runtime.signal(execution.getId());
+            runtime.trigger(execution.getId());
             ProcessInstance instance = runtime.createProcessInstanceQuery()
             .processInstanceId(completedId)
             .singleResult();
@@ -565,7 +565,7 @@ public class ActivitiWorkflowComponentTest extends AbstractActivitiComponentTest
             Execution execution = runtime.createExecutionQuery()
             .processInstanceId(completedId)
             .singleResult();
-            runtime.signal(execution.getId());
+            runtime.trigger(execution.getId());
             ProcessInstance instance = runtime.createProcessInstanceQuery()
             .processInstanceId(completedId)
             .singleResult();

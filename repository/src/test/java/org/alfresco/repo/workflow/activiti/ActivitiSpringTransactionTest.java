@@ -128,7 +128,7 @@ public class ActivitiSpringTransactionTest extends TestCase
                 assertTrue("The node should have the aspect!", nodeService.hasAspect(workingNodeRef, ASPECT));
                 try
                 {
-                    runtime.signal("Fake Id");
+                    runtime.trigger("Fake Id");
                     fail("Should throw an Exception here!");
                 }
                 catch (ActivitiException e)
