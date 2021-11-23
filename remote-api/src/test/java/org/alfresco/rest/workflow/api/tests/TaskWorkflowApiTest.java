@@ -1222,7 +1222,12 @@ public class TaskWorkflowApiTest extends EnterpriseWorkflowTestApi
             }
             
             // Resolving as assignee
-            task.delegate(user);
+            task.setDelegationState(DelegationState.PENDING);
+            if (task.getOwner() == null) {
+                task.setOwner(task.getAssignee());
+            }
+            task.setAssignee(user);
+
             activitiProcessEngine.getTaskService().saveTask(task);
             taskBody.put("state", "resolved");
             taskBody.put("assignee", initiator);
