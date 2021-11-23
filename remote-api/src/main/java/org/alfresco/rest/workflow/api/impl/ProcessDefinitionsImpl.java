@@ -29,22 +29,23 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
-import org.activiti.engine.form.StartFormData;
+import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.bpmn.model.FlowElement;
+import org.activiti.bpmn.model.StartEvent;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.image.ProcessDiagramGenerator;
+import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.alfresco.repo.i18n.MessageService;
 import org.alfresco.repo.tenant.TenantUtil;
 import org.alfresco.repo.workflow.WorkflowDeployer;
 import org.alfresco.repo.workflow.WorkflowModel;
 import org.alfresco.repo.workflow.WorkflowObjectFactory;
 import org.alfresco.repo.workflow.WorkflowQNameConverter;
+import org.alfresco.repo.workflow.activiti.ActivitiConstants;
 import org.alfresco.rest.antlr.WhereClauseParser;
 import org.alfresco.rest.framework.core.exceptions.ApiException;
 import org.alfresco.rest.framework.core.exceptions.EntityNotFoundException;
@@ -94,6 +95,7 @@ public class ProcessDefinitionsImpl extends WorkflowRestImpl implements ProcessD
     {
         this.engineId = engineId;
     }
+
 
     @Override
     public CollectionWithPagingInfo<ProcessDefinition> getProcessDefinitions(Parameters parameters)
@@ -278,7 +280,7 @@ public class ProcessDefinitionsImpl extends WorkflowRestImpl implements ProcessD
         
         try
         {
-        	InputStream processDiagram = activitiProcessEngine.getRepositoryService().getProcessDiagram(definitionId);
+        	InputStream processDiagram = getProcessDiagram(definitionId);
         	if (processDiagram != null) 
         	{
 	            File file = TempFileProvider.createTempFile(definitionId + UUID.randomUUID(), ".png");
@@ -299,6 +301,23 @@ public class ProcessDefinitionsImpl extends WorkflowRestImpl implements ProcessD
         }
     }
 
+    public InputStream getProcessDiagram(String processInstanceId) {
+        ProcessInstance processInstance = activitiProcessEngine.getRuntimeService().createProcessInstanceQuery()
+                    .processInstanceId(processInstanceId).singleResult();
+
+        // null check
+        if (processInstance != null) {
+            // get process model
+            BpmnModel model = activitiProcessEngine.getRepositoryService().getBpmnModel(processInstance.getProcessDefinitionId());
+
+            if (model != null && model.getLocationMap().size() > 0) {
+                ProcessDiagramGenerator generator = new DefaultProcessDiagramGenerator();
+                return generator.generateDiagram(model, Collections.singletonList(ActivitiConstants.PROCESS_INSTANCE_IMAGE_FORMAT),
+                            activitiProcessEngine.getRuntimeService().getActiveActivityIds(processInstanceId));
+            }
+        }
+        return null;
+    }
     @Override
     public CollectionWithPagingInfo<FormModelElement> getStartFormModel(String definitionId, Paging paging)
     {
@@ -318,9 +337,13 @@ public class ProcessDefinitionsImpl extends WorkflowRestImpl implements ProcessD
                 throw new EntityNotFoundException(definitionId); 
             }
         }
-        
-        StartFormData startFormData = activitiProcessEngine.getFormService().getStartFormData(definitionId);
-        if (startFormData == null)
+        org.activiti.engine.repository.ProcessDefinition processDefinition = activitiProcessEngine
+                    .getRepositoryService()
+                    .getProcessDefinition(definitionId);
+        FlowElement startElement = activitiProcessEngine.getRepositoryService().getBpmnModel(processDefinition.getId())
+                    .getProcessById(processDefinition.getKey()).getInitialFlowElement();
+
+        if (startElement == null || !(startElement instanceof StartEvent))
         {
             throw new EntityNotFoundException(definitionId);
         }
@@ -335,7 +358,8 @@ public class ProcessDefinitionsImpl extends WorkflowRestImpl implements ProcessD
         }
         
         // Lookup type definition for the startTask
-        TypeDefinition startTaskType = workflowFactory.getTaskFullTypeDefinition(startFormData.getFormKey(), true);
+        StartEvent startEvent = (StartEvent) startElement;
+        TypeDefinition startTaskType = workflowFactory.getTaskFullTypeDefinition(startEvent.getFormKey(), true);
         return getFormModelElements(startTaskType, paging);
     }
     
@@ -382,11 +406,8 @@ public class ProcessDefinitionsImpl extends WorkflowRestImpl implements ProcessD
         {
             try 
             {
-                StartFormData startFormData = activitiProcessEngine.getFormService().getStartFormData(processDefinition.getId());
-                if (startFormData != null) 
-                {
-                    processDefinitionRest.setStartFormResourceKey(startFormData.getFormKey());
-                }
+                    processDefinitionRest.setStartFormResourceKey(activitiProcessEngine.getRepositoryService().getBpmnModel(processDefinition.getId())
+                                .getStartFormKey(processDefinition.getKey()));
             }
             catch (Exception e) 
             {
