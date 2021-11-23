@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,13 +42,16 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.bpmn.model.FlowElement;
+import org.activiti.bpmn.model.Process;
+import org.activiti.bpmn.model.StartEvent;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RuntimeService;
-import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.activiti.engine.history.HistoricVariableInstance;
 import org.activiti.engine.impl.identity.Authentication;
+import org.activiti.engine.impl.util.ProcessDefinitionUtil;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -482,10 +486,14 @@ public class ProcessesImpl extends WorkflowRestImpl implements Processes
             {
                 if (definitionTypeMap.containsKey(processInfo.getProcessDefinitionId()) == false)
                 {
-                    StartFormData startFormData = activitiProcessEngine.getFormService().getStartFormData(processInfo.getProcessDefinitionId());
-                    if (startFormData != null)
+                    ProcessDefinition processDefinition = ProcessDefinitionUtil.getProcessDefinition(processDefinitionId);
+                    Process process = ProcessDefinitionUtil.getBpmnModel(processDefinition.getId())
+                                                               .getProcessById(processDefinition.getKey());
+                    FlowElement startElement = process.getInitialFlowElement();
+                    if (startElement instanceof StartEvent)
                     {
-                        String formKey = startFormData.getFormKey();
+                        StartEvent startEvent = (StartEvent) startElement;
+                        String formKey = startEvent.getFormKey();
                         definitionTypeMap.put(processInfo.getProcessDefinitionId(), getWorkflowFactory().getTaskFullTypeDefinition(formKey, true));
                     }
                 }
@@ -583,13 +591,18 @@ public class ProcessesImpl extends WorkflowRestImpl implements Processes
         }
         
         Map<QName, Serializable> startParams = new HashMap<QName, Serializable>();
-        
-        StartFormData startFormData = activitiProcessEngine.getFormService().getStartFormData(processDefinitionId);
-        if (startFormData != null)
+
+        ProcessDefinition processDefinition = ProcessDefinitionUtil.getProcessDefinition(processDefinitionId);
+        Process processById = ProcessDefinitionUtil.getBpmnModel(processDefinition.getId())
+                                                   .getProcessById(processDefinition.getKey());
+        FlowElement startElement = processById.getInitialFlowElement();
+
+        if (startElement instanceof StartEvent)
         {
             if (CollectionUtils.isEmpty(process.getVariables()) == false)
             {
-                TypeDefinition startTaskType = getWorkflowFactory().getTaskFullTypeDefinition(startFormData.getFormKey(), true);
+                StartEvent startEvent = (StartEvent) startElement;
+                TypeDefinition startTaskType = getWorkflowFactory().getTaskFullTypeDefinition(startEvent.getFormKey(), true);
                 
                 // Lookup type definition for the startTask
                 Map<QName, PropertyDefinition> taskProperties = startTaskType.getProperties();
@@ -831,10 +844,15 @@ public class ProcessesImpl extends WorkflowRestImpl implements Processes
 
         // Get start-task definition for explicit typing of variables submitted at the start
         String formKey = null;
-        StartFormData startFormData = activitiProcessEngine.getFormService().getStartFormData(processDefinitionId);
-        if (startFormData != null)
+        ProcessDefinition processDefinition = ProcessDefinitionUtil.getProcessDefinition(processDefinitionId);
+        Process process = ProcessDefinitionUtil.getBpmnModel(processDefinition.getId())
+                                               .getProcessById(processDefinition.getKey());
+        FlowElement startElement = process.getInitialFlowElement();
+
+        if (startElement instanceof StartEvent)
         {
-            formKey = startFormData.getFormKey();
+            StartEvent startEvent = (StartEvent) startElement;
+            formKey = startEvent.getFormKey();
         }
         
         TypeDefinition startTaskTypeDefinition = getWorkflowFactory().getTaskFullTypeDefinition(formKey, true);
@@ -898,10 +916,16 @@ public class ProcessesImpl extends WorkflowRestImpl implements Processes
         
         // Get start-task definition for explicit typing of variables submitted at the start
         String formKey = null;
-        StartFormData startFormData = activitiProcessEngine.getFormService().getStartFormData(processDefinitionId);
-        if (startFormData != null)
+
+        ProcessDefinition processDefinition = ProcessDefinitionUtil.getProcessDefinition(processDefinitionId);
+        Process process = ProcessDefinitionUtil.getBpmnModel(processDefinition.getId())
+                                               .getProcessById(processDefinition.getKey());
+        FlowElement startElement = process.getInitialFlowElement();
+
+        if (startElement instanceof StartEvent)
         {
-            formKey = startFormData.getFormKey();
+            StartEvent startEvent = (StartEvent) startElement;
+            formKey = startEvent.getFormKey();
         }
         
         DataTypeDefinition dataTypeDefinition = null;
@@ -1053,7 +1077,7 @@ public class ProcessesImpl extends WorkflowRestImpl implements Processes
             {
                 List<String> activeActivities = activitiProcessEngine.getRuntimeService().getActiveActivityIds(processId);
                 ProcessDiagramGenerator generator = new DefaultProcessDiagramGenerator();
-                InputStream generateDiagram = generator.generateDiagram(model, "png", activeActivities);
+                InputStream generateDiagram = generator.generateDiagram(model, Collections.singletonList("png"), activeActivities);
                 
                 File file = TempFileProvider.createTempFile(processId + UUID.randomUUID(), ".png");
                 FileOutputStream fos = new FileOutputStream(file);
