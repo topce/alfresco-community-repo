@@ -15,8 +15,6 @@
         <property name="targetDataSource" ref="dataSource" />
     </bean>
 
-    <bean id="activiti5CompabilityFactory" class="org.activiti.compatibility.spring.SpringActiviti5CompatibilityHandlerFactory" />
-
     <!-- Additional datasource to use for Activit's ID-generator -->
     <bean id="activitiIdGeneratorDataSource" class="org.alfresco.config.JndiObjectFactoryBean">
         <property name="jndiName">
@@ -83,13 +81,10 @@
 
         <!-- Job-executor will be enabled once the SchemaAvailableEvent has 
             been fired -->
-        <property name="jobExecutorActivate" value="false" />
+<!--        <property name="jobExecutorActivate" value="false" />-->
 
         <!-- Limit the visible beans in expressions -->
         <property name="beans" ref="activitiBeanRegistry" />
-
-        <property name="activiti5CompatibilityEnabled" value="true" />
-        <property name="activiti5CompatibilityHandlerFactory" ref="activiti5CompabilityFactory" />
 
         <property name="customTypes">
             <list>
