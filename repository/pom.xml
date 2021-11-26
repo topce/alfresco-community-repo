@@ -579,17 +579,6 @@
             <version>${dependency.activiti.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.activiti</groupId>
-            <artifactId>activiti5-spring-compatibility</artifactId>
-            <version>6.0.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.activiti</groupId>
-            <artifactId>activiti5-spring</artifactId>
-            <version>6.0.0</version>
-        </dependency>
         <!-- Keycloak dependencies -->
         <dependency>
             <groupId>org.keycloak</groupId>
