@@ -75,6 +75,7 @@
                 <ref bean="patch.db-V5.0-update-activiti-default-timestamp-column" />
                 <ref bean="patch.db-V5.0-activiti-correct-tenant-id-MSSQL" />
                 <ref bean="patch.db-V5.1-upgrade-to-activiti-5.19.0" />
+                <ref bean="patch.db-V7.2-activiti-upgrade-7-1-0-M16" />
             </list>
         </property>
     </bean>
