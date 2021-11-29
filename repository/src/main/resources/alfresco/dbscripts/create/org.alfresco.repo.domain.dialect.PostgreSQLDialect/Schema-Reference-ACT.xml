@@ -1281,6 +1281,16 @@
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
+        <column name="engine_version_" order="15">
+          <type>varchar(255)</type>
+          <nullable>true</nullable>
+          <autoincrement>false</autoincrement>
+        </column>
+        <column name="app_version_" order="16">
+          <type>int4</type>
+          <nullable>false</nullable>
+          <autoincrement>false</autoincrement>
+        </column>
       </columns>
       <primarykey name="act_re_procdef_pkey">
         <columnnames>
@@ -1592,6 +1602,11 @@
             <columnname>business_key_</columnname>
           </columnnames>
         </index>
+        <index name="act_idx_exe_root" unique="false">
+          <columnnames>
+            <columnname>root_proc_inst_id_</columnname>
+          </columnnames>
+        </index>
       </indexes>
     </table>
     <table name="act_ru_identitylink">
@@ -1786,11 +1801,41 @@
           <targettable>act_ge_bytearray</targettable>
           <targetcolumn>id_</targetcolumn>
         </foreignkey>
+        <foreignkey name="act_fk_job_execution">
+          <localcolumn>execution_id_</localcolumn>
+          <targettable>act_ru_execution</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+        <foreignkey name="act_fk_job_process_instance">
+          <localcolumn>process_instance_id_</localcolumn>
+          <targettable>act_ru_execution</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+        <foreignkey name="act_fk_job_proc_def">
+          <localcolumn>proc_def_id_</localcolumn>
+          <targettable>act_re_procdef</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
       </foreignkeys>
       <indexes>
         <index name="act_idx_job_exception" unique="false">
           <columnnames>
             <columnname>exception_stack_id_</columnname>
+          </columnnames>
+        </index>
+        <index name="act_idx_job_execution_id" unique="false">
+          <columnnames>
+            <columnname>execution_id_</columnname>
+          </columnnames>
+        </index>
+        <index name="act_idx_job_process_instance_id" unique="false">
+          <columnnames>
+            <columnname>process_instance_id_</columnname>
+          </columnnames>
+        </index>
+        <index name="act_idx_job_proc_def_id" unique="false">
+          <columnnames>
+            <columnname>proc_def_id_</columnname>
           </columnnames>
         </index>
       </indexes>
@@ -1888,6 +1933,50 @@
           <columnname order="1">id_</columnname>
         </columnnames>
       </primarykey>
+      <foreignkeys>
+        <foreignkey name="act_fk_timer_job_execution">
+          <localcolumn>execution_id_</localcolumn>
+          <targettable>act_ru_execution</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+        <foreignkey name="act_fk_timer_job_process_instance">
+          <localcolumn>process_instance_id_</localcolumn>
+          <targettable>act_ru_execution</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+        <foreignkey name="act_fk_timer_job_proc_def">
+          <localcolumn>process_instance_id_</localcolumn>
+          <targettable>act_re_procdef</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+        <foreignkey name="act_fk_timer_job_exception">
+          <localcolumn>exception_stack_id_</localcolumn>
+          <targettable>act_ge_bytearray</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+      </foreignkeys>
+      <indexes>
+        <index name="act_idx_timer_job_execution_id" unique="false">
+          <columnnames>
+            <columnname>execution_id_</columnname>
+          </columnnames>
+        </index>
+        <index name="act_idx_timer_job_process_instance_id" unique="false">
+          <columnnames>
+            <columnname>process_instance_id_</columnname>
+          </columnnames>
+        </index>
+        <index name="act_idx_timer_job_proc_def_id" unique="false">
+          <columnnames>
+            <columnname>proc_def_id_</columnname>
+          </columnnames>
+        </index>
+        <index name="act_idx_timer_job_exception" unique="false">
+          <columnnames>
+            <columnname>exception_stack_id_</columnname>
+          </columnnames>
+        </index>
+      </indexes>
     </table>
       <table name="act_ru_suspended_job">
       <columns>
@@ -1972,6 +2061,50 @@
           <columnname order="1">id_</columnname>
         </columnnames>
       </primarykey>
+      <foreignkeys>
+        <foreignkey name="act_fk_suspended_job_execution">
+          <localcolumn>execution_id_</localcolumn>
+          <targettable>act_ru_execution</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+        <foreignkey name="act_fk_suspended_job_process_instance">
+          <localcolumn>process_instance_id_</localcolumn>
+          <targettable>act_ru_execution</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+        <foreignkey name="act_fk_suspended_job_proc_def">
+          <localcolumn>process_instance_id_</localcolumn>
+          <targettable>act_re_procdef</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+        <foreignkey name="act_fk_suspended_job_exception">
+          <localcolumn>exception_stack_id_</localcolumn>
+          <targettable>act_ge_bytearray</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+      </foreignkeys>
+      <indexes>
+        <index name="act_idx_suspended_job_execution_id" unique="false">
+          <columnnames>
+            <columnname>execution_id_</columnname>
+          </columnnames>
+        </index>
+        <index name="act_idx_suspended_job_process_instance_id" unique="false">
+          <columnnames>
+            <columnname>process_instance_id_</columnname>
+          </columnnames>
+        </index>
+        <index name="act_idx_suspended_job_proc_def_id" unique="false">
+          <columnnames>
+            <columnname>proc_def_id_</columnname>
+          </columnnames>
+        </index>
+        <index name="act_idx_suspended_job_exception" unique="false">
+          <columnnames>
+            <columnname>exception_stack_id_</columnname>
+          </columnnames>
+        </index>
+      </indexes>
     </table>
     <table name="act_ru_deadletter_job">
       <columns>
@@ -2056,6 +2189,50 @@
           <columnname order="1">id_</columnname>
         </columnnames>
       </primarykey>
+      <foreignkeys>
+        <foreignkey name="act_fk_deadletter_job_execution">
+          <localcolumn>execution_id_</localcolumn>
+          <targettable>act_ru_execution</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+        <foreignkey name="act_fk_deadletter_job_process_instance">
+          <localcolumn>process_instance_id_</localcolumn>
+          <targettable>act_ru_execution</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+        <foreignkey name="act_fk_deadletter_job_proc_def">
+          <localcolumn>process_instance_id_</localcolumn>
+          <targettable>act_re_procdef</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+        <foreignkey name="act_fk_deadletter_job_exception">
+          <localcolumn>exception_stack_id_</localcolumn>
+          <targettable>act_ge_bytearray</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+      </foreignkeys>
+      <indexes>
+        <index name="act_idx_deadletter_job_execution_id" unique="false">
+          <columnnames>
+            <columnname>execution_id_</columnname>
+          </columnnames>
+        </index>
+        <index name="act_idx_deadletter_job_process_instance_id" unique="false">
+          <columnnames>
+            <columnname>process_instance_id_</columnname>
+          </columnnames>
+        </index>
+        <index name="act_idx_deadletter_job_proc_def_id" unique="false">
+          <columnnames>
+            <columnname>proc_def_id_</columnname>
+          </columnnames>
+        </index>
+        <index name="act_idx_deadletter_job_exception" unique="false">
+          <columnnames>
+            <columnname>exception_stack_id_</columnname>
+          </columnnames>
+        </index>
+      </indexes>
     </table>
     <table name="act_ru_task">
       <columns>
@@ -2089,68 +2266,83 @@
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="parent_task_id_" order="7">
+        <column name="business_key_" order="7">
+          <type>varchar(255)</type>
+          <nullable>true</nullable>
+          <autoincrement>false</autoincrement>
+        </column>
+        <column name="parent_task_id_" order="8">
           <type>varchar(64)</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="description_" order="8">
+        <column name="description_" order="9">
           <type>varchar(4000)</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="task_def_key_" order="9">
+        <column name="task_def_key_" order="10">
           <type>varchar(255)</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="owner_" order="10">
+        <column name="owner_" order="11">
           <type>varchar(255)</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="assignee_" order="11">
+        <column name="assignee_" order="12">
           <type>varchar(255)</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="delegation_" order="12">
+        <column name="delegation_" order="13">
           <type>varchar(64)</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="priority_" order="13">
+        <column name="priority_" order="14">
           <type>int4</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="create_time_" order="14">
+        <column name="create_time_" order="15">
           <type>timestamp</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="due_date_" order="15">
+        <column name="due_date_" order="16">
           <type>timestamp</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="category_" order="16">
+        <column name="category_" order="17">
           <type>varchar(255)</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="suspension_state_" order="17">
+        <column name="suspension_state_" order="18">
           <type>int4</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="tenant_id_" order="18">
+        <column name="tenant_id_" order="19">
           <type>varchar(255)</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="form_key_" order="19">
+        <column name="form_key_" order="20">
           <type>varchar(255)</type>
+          <nullable>true</nullable>
+          <autoincrement>false</autoincrement>
+        </column>
+        <column name="claim_time_" order="21">
+          <type>timestamp</type>
+          <nullable>true</nullable>
+          <autoincrement>false</autoincrement>
+        </column>
+        <column name="app_version_" order="22">
+          <type>int4</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
@@ -2365,6 +2557,62 @@
           </columnnames>
         </index>
       </indexes>    
+    </table>
+    <table name="act_ru_integration">
+      <columns>
+        <column name="ID_" order="1">
+          <type>varchar(64)</type>
+          <nullable>false</nullable>
+          <autoincrement>false</autoincrement>
+        </column>
+        <column name="EXECUTION_ID_" order="2">
+          <type>varchar(64)</type>
+          <nullable>false</nullable>
+          <autoincrement>false</autoincrement>
+        </column>
+        <column name="PROCESS_INSTANCE_ID_" order="2">
+          <type>varchar(64)</type>
+          <nullable>false</nullable>
+          <autoincrement>false</autoincrement>
+        </column>
+        <column name="PROC_DEF_ID_" order="2">
+          <type>varchar(64)</type>
+          <nullable>false</nullable>
+          <autoincrement>false</autoincrement>
+        </column>
+        <column name="FLOW_NODE_ID_" order="2">
+          <type>varchar(64)</type>
+          <nullable>false</nullable>
+          <autoincrement>false</autoincrement>
+        </column>
+        <column name="CREATED_DATE_" order="16">
+          <type>timestamp</type>
+          <nullable>true</nullable>
+          <autoincrement>false</autoincrement>
+        </column>
+      </columns>
+      <primarykey name="act_ru_integration_pkey">
+        <columnnames>
+          <columnname order="1">id_</columnname>
+        </columnnames>
+      </primarykey>
+      <foreignkeys>
+        <foreignkey name="act_fk_int_execution">
+          <localcolumn>execution_id_</localcolumn>
+          <targettable>act_ru_execution</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+        <foreignkey name="act_fk_int_proc_inst">
+          <localcolumn>process_instance_id_</localcolumn>
+          <targettable>act_ru_execution</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+        <foreignkey name="act_fk_int_proc_def">
+          <localcolumn>proc_def_id_</localcolumn>
+          <targettable>act_re_procdef</targettable>
+          <targetcolumn>id_</targetcolumn>
+        </foreignkey>
+      </foreignkeys>
     </table>
   </objects>
 </schema>
