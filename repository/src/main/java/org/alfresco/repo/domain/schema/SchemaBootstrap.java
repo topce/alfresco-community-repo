@@ -78,6 +78,7 @@ import org.alfresco.repo.domain.dialect.Dialect;
 import org.alfresco.repo.domain.dialect.MySQLInnoDBDialect;
 import org.alfresco.repo.domain.dialect.PostgreSQLDialect;
 import org.alfresco.repo.domain.patch.AppliedPatchDAO;
+import org.alfresco.repo.workflow.activiti.AlfrescoStandaloneProcessEngineConfiguration;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.descriptor.DescriptorService;
 import org.alfresco.util.DatabaseMetaDataHelper;
@@ -1011,10 +1012,11 @@ public class SchemaBootstrap extends AbstractLifecycleBean
     {
         // create instance of activiti engine to initialise schema
         ProcessEngine engine = null;
-        ProcessEngineConfiguration engineConfig = ProcessEngineConfiguration.createStandaloneProcessEngineConfiguration();
+        ProcessEngineConfiguration engineConfig = new AlfrescoStandaloneProcessEngineConfiguration();
+
         try
         {
-            // build the engine
+            // build the engineś
             engine = engineConfig.setDataSource(dataSource).
                 setDatabaseSchemaUpdate("none").
                 setProcessEngineName("activitiBootstrapEngine").
