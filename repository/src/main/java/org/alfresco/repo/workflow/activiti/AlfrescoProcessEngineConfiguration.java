@@ -52,6 +52,7 @@ public class AlfrescoProcessEngineConfiguration extends SpringProcessEngineConfi
         // Make sure the synchornizationAdapter is run before the AlfrescoTransactionSupport (and also before the
         // myBatis synchonisation, which unbinds the neccesairy sqlSession used by the JobFailedListener)
         this.transactionSynchronizationAdapterOrder = AlfrescoTransactionSupport.SESSION_SYNCHRONIZATION_ORDER - 100;
+        super.performanceSettings.setValidateExecutionRelationshipCountConfigOnBoot(false);
     }
     
     @Override
