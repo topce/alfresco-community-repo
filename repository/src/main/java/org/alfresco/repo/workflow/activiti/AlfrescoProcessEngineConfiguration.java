@@ -28,11 +28,13 @@ package org.alfresco.repo.workflow.activiti;
 
 import java.util.List;
 
+import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.impl.jobexecutor.AsyncContinuationJobHandler;
 import org.activiti.engine.impl.jobexecutor.JobHandler;
 import org.activiti.engine.impl.variable.SerializableType;
 import org.activiti.engine.impl.variable.VariableType;
 import org.activiti.spring.SpringProcessEngineConfiguration;
+import org.activiti.spring.autodeployment.AutoDeploymentStrategy;
 import org.alfresco.repo.transaction.AlfrescoTransactionSupport;
 import org.alfresco.repo.workflow.activiti.variable.CustomStringVariableType;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -54,7 +56,16 @@ public class AlfrescoProcessEngineConfiguration extends SpringProcessEngineConfi
         this.transactionSynchronizationAdapterOrder = AlfrescoTransactionSupport.SESSION_SYNCHRONIZATION_ORDER - 100;
         super.performanceSettings.setValidateExecutionRelationshipCountConfigOnBoot(false);
     }
-    
+
+    @Override
+    protected void autoDeployResources(ProcessEngine processEngine){
+        if (this.deploymentResources != null && this.deploymentResources.length > 0)
+        {
+            final AutoDeploymentStrategy strategy = getAutoDeploymentStrategy(deploymentMode);
+            strategy.deployResources(deploymentName, deploymentResources, processEngine.getRepositoryService());
+        }
+    }
+
     @Override
     public void initVariableTypes()
     {
