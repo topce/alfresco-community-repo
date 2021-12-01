@@ -161,8 +161,8 @@ public class ActivitiTypeConverter
         String defaultTitle = definition.getName();
 
         String startTaskName = null;
-        Process process = ProcessDefinitionUtil.getBpmnModel(defId)
-                    .getProcessById(defName);
+        Process process = repositoryService.getBpmnModel(defId)
+                                           .getProcessById(defName);
         FlowElement startElement = process.getInitialFlowElement();
         if(startElement instanceof StartEvent)
         {
@@ -171,7 +171,7 @@ public class ActivitiTypeConverter
         }
 
 
-        ProcessDefinition def = activitiUtil.getDeployedProcessDefinition(defId);
+        ProcessDefinition def = repositoryService.getProcessDefinition(defId);
         FlowElement startEvent = repositoryService
                     .getBpmnModel(def.getId())
                     .getProcessById(def.getKey())
