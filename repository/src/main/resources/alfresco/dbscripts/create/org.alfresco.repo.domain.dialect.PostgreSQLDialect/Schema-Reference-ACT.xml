@@ -233,7 +233,12 @@
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="tenant_id_" order="14">
+        <column name="delete_reason_" order="14">
+          <type>varchar(4000)</type>
+          <nullable>true</nullable>
+          <autoincrement>false</autoincrement>
+        </column>
+        <column name="tenant_id_" order="15">
           <type>varchar(255)</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
@@ -873,178 +878,6 @@
         </index>
       </indexes>
     </table>
-    <table name="act_id_group">
-      <columns>
-        <column name="id_" order="1">
-          <type>varchar(64)</type>
-          <nullable>false</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="rev_" order="2">
-          <type>int4</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="name_" order="3">
-          <type>varchar(255)</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="type_" order="4">
-          <type>varchar(255)</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-      </columns>
-      <primarykey name="act_id_group_pkey">
-        <columnnames>
-          <columnname order="1">id_</columnname>
-        </columnnames>
-      </primarykey>
-      <foreignkeys/>
-      <indexes/>
-    </table>
-    <table name="act_id_info">
-      <columns>
-        <column name="id_" order="1">
-          <type>varchar(64)</type>
-          <nullable>false</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="rev_" order="2">
-          <type>int4</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="user_id_" order="3">
-          <type>varchar(64)</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="type_" order="4">
-          <type>varchar(64)</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="key_" order="5">
-          <type>varchar(255)</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="value_" order="6">
-          <type>varchar(255)</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="password_" order="7">
-          <type>bytea</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="parent_id_" order="8">
-          <type>varchar(255)</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-      </columns>
-      <primarykey name="act_id_info_pkey">
-        <columnnames>
-          <columnname order="1">id_</columnname>
-        </columnnames>
-      </primarykey>
-      <foreignkeys/>
-      <indexes/>
-    </table>
-    <table name="act_id_membership">
-      <columns>
-        <column name="user_id_" order="1">
-          <type>varchar(64)</type>
-          <nullable>false</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="group_id_" order="2">
-          <type>varchar(64)</type>
-          <nullable>false</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-      </columns>
-      <primarykey name="act_id_membership_pkey">
-        <columnnames>
-          <columnname order="1">user_id_</columnname>
-          <columnname order="2">group_id_</columnname>
-        </columnnames>
-      </primarykey>
-      <foreignkeys>
-        <foreignkey name="act_fk_memb_group">
-          <localcolumn>group_id_</localcolumn>
-          <targettable>act_id_group</targettable>
-          <targetcolumn>id_</targetcolumn>
-        </foreignkey>
-        <foreignkey name="act_fk_memb_user">
-          <localcolumn>user_id_</localcolumn>
-          <targettable>act_id_user</targettable>
-          <targetcolumn>id_</targetcolumn>
-        </foreignkey>
-      </foreignkeys>
-      <indexes>
-        <index name="act_idx_memb_group" unique="false">
-          <columnnames>
-            <columnname>group_id_</columnname>
-          </columnnames>
-        </index>
-        <index name="act_idx_memb_user" unique="false">
-          <columnnames>
-            <columnname>user_id_</columnname>
-          </columnnames>
-        </index>
-      </indexes>
-    </table>
-    <table name="act_id_user">
-      <columns>
-        <column name="id_" order="1">
-          <type>varchar(64)</type>
-          <nullable>false</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="rev_" order="2">
-          <type>int4</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="first_" order="3">
-          <type>varchar(255)</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="last_" order="4">
-          <type>varchar(255)</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="email_" order="5">
-          <type>varchar(255)</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="pwd_" order="6">
-          <type>varchar(255)</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="picture_id_" order="7">
-          <type>varchar(64)</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-      </columns>
-      <primarykey name="act_id_user_pkey">
-        <columnnames>
-          <columnname order="1">id_</columnname>
-        </columnnames>
-      </primarykey>
-      <foreignkeys/>
-      <indexes/>
-    </table>
     <table name="act_re_deployment">
       <columns>
         <column name="id_" order="1">
@@ -1288,7 +1121,7 @@
         </column>
         <column name="app_version_" order="16">
           <type>int4</type>
-          <nullable>false</nullable>
+          <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
       </columns>
@@ -1945,7 +1778,7 @@
           <targetcolumn>id_</targetcolumn>
         </foreignkey>
         <foreignkey name="act_fk_timer_job_proc_def">
-          <localcolumn>process_instance_id_</localcolumn>
+          <localcolumn>proc_def_id_</localcolumn>
           <targettable>act_re_procdef</targettable>
           <targetcolumn>id_</targetcolumn>
         </foreignkey>
@@ -2073,7 +1906,7 @@
           <targetcolumn>id_</targetcolumn>
         </foreignkey>
         <foreignkey name="act_fk_suspended_job_proc_def">
-          <localcolumn>process_instance_id_</localcolumn>
+          <localcolumn>proc_def_id_</localcolumn>
           <targettable>act_re_procdef</targettable>
           <targetcolumn>id_</targetcolumn>
         </foreignkey>
@@ -2143,42 +1976,37 @@
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="retries_" order="8">
-          <type>int4</type>
-          <nullable>true</nullable>
-          <autoincrement>false</autoincrement>
-        </column>
-        <column name="exception_stack_id_" order="9">
+        <column name="exception_stack_id_" order="8">
           <type>varchar(64)</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="exception_msg_" order="10">
+        <column name="exception_msg_" order="9">
           <type>varchar(4000)</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="duedate_" order="11">
+        <column name="duedate_" order="10">
           <type>timestamp</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="repeat_" order="12">
+        <column name="repeat_" order="11">
           <type>varchar(255)</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="handler_type_" order="13">
+        <column name="handler_type_" order="12">
           <type>varchar(255)</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="handler_cfg_" order="14">
+        <column name="handler_cfg_" order="13">
           <type>varchar(4000)</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
-        <column name="tenant_id_" order="15">
+        <column name="tenant_id_" order="14">
           <type>varchar(255)</type>
           <nullable>true</nullable>
           <autoincrement>false</autoincrement>
@@ -2201,7 +2029,7 @@
           <targetcolumn>id_</targetcolumn>
         </foreignkey>
         <foreignkey name="act_fk_deadletter_job_proc_def">
-          <localcolumn>process_instance_id_</localcolumn>
+          <localcolumn>proc_def_id_</localcolumn>
           <targettable>act_re_procdef</targettable>
           <targetcolumn>id_</targetcolumn>
         </foreignkey>
@@ -2567,22 +2395,22 @@
         </column>
         <column name="EXECUTION_ID_" order="2">
           <type>varchar(64)</type>
-          <nullable>false</nullable>
+          <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
         <column name="PROCESS_INSTANCE_ID_" order="2">
           <type>varchar(64)</type>
-          <nullable>false</nullable>
+          <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
         <column name="PROC_DEF_ID_" order="2">
           <type>varchar(64)</type>
-          <nullable>false</nullable>
+          <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
         <column name="FLOW_NODE_ID_" order="2">
           <type>varchar(64)</type>
-          <nullable>false</nullable>
+          <nullable>true</nullable>
           <autoincrement>false</autoincrement>
         </column>
         <column name="CREATED_DATE_" order="16">
