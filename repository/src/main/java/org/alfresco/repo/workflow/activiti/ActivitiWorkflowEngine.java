@@ -840,7 +840,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
     {
         if (job instanceof TimerJobEntity)
         {
-            ProcessDefinition def = activitiUtil.getDeployedProcessDefinition(processInstance.getProcessDefinitionId());
+            ProcessDefinition def = repoService.getProcessDefinition(processInstance.getProcessDefinitionId());
             List<String> activeActivityIds = runtimeService.getActiveActivityIds(jobExecution.getId());
             
             if(activeActivityIds.size() == 1)
@@ -1446,7 +1446,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
         ProcessInstance processInstance = activitiUtil.getProcessInstance(processInstanceId);
         String currentActivity = ((ExecutionEntity)processInstance).getActivityId();
         
-        ProcessDefinition procDef = activitiUtil.getDeployedProcessDefinition(processInstance.getProcessDefinitionId());
+        ProcessDefinition procDef = repoService.getProcessDefinition(processInstance.getProcessDefinitionId());
         FlowElement activity = repoService.getBpmnModel(procDef.getId()).getFlowElement(procDef.getKey());
         if(isReceiveTask(activity) && isFirstActivity(activity, procDef)) 
         {
