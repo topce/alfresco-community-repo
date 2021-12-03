@@ -949,9 +949,9 @@ public class ActivitiPropertyConverter
             String wfDescription = (String) defaultProperties.get(WorkflowModel.PROP_WORKFLOW_DESCRIPTION);
             String procDefKey = procDef.getKey();
 //            ReadOnlyProcessDefinition deployedDef = activitiUtil.getDeployedProcessDefinition(processDefId);
-            ProcessDefinitionEntityImpl deployedDef =
-                        (ProcessDefinitionEntityImpl) ProcessDefinitionUtil.getProcessDefinitionFromDatabase(processDefId);
-            String startEventName = deployedDef.getName();
+//            ProcessDefinitionEntityImpl deployedDef =
+//                        (ProcessDefinitionEntityImpl) ProcessDefinitionUtil.getProcessDefinitionFromDatabase(processDefId);
+            String startEventName = activitiUtil.getStartTaskTypeName(processDefId);
             String wfDefKey = factory.buildGlobalId(procDefKey);
             description = factory.getTaskDescription(startTaskType, wfDefKey, wfDescription, startEventName);
             defaultProperties.put(WorkflowModel.PROP_DESCRIPTION, description);
