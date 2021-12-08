@@ -28,6 +28,7 @@ package org.alfresco.repo.workflow.activiti;
 
 import java.util.Map;
 
+import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.StartEvent;
@@ -158,6 +159,11 @@ public class ActivitiUtil
             formKey = startEvent.getFormKey();
         }
         return formKey;
+    }
+
+    public BpmnModel bpmnModel(String processDefinitionId)
+    {
+        return repoService.getBpmnModel(processDefinitionId);
     }
 
     public Map<String, Object> getExecutionVariables(String executionId)
