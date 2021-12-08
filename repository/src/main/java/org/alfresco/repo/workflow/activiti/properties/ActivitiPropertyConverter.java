@@ -454,7 +454,7 @@ public class ActivitiPropertyConverter
         
         // Map all the properties
         Map<QName, Serializable> properties =mapArbitraryProperties(variables, variables, taskProperties, taskAssociations);
-        
+
         // Map activiti task instance fields to properties
         properties.put(WorkflowModel.PROP_TASK_ID, ActivitiConstants.START_TASK_PREFIX + historicProcessInstance.getId());
         
@@ -521,7 +521,7 @@ public class ActivitiPropertyConverter
             .activityId(historicProcessInstance.getStartActivityId())
             .singleResult();
         
-        Map<String, Object> variables = getHistoricActivityVariables(startEvent.getId());
+        Map<String, Object> variables = getHistoricProcessVariables(startEvent.getProcessInstanceId());
         return variables;
     }
 
