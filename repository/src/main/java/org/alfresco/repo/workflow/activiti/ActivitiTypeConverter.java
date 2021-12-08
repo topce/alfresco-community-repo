@@ -557,12 +557,12 @@ public class ActivitiTypeConverter
         // Convert start-event to start-task Node
         String definitionId = processInstance.getProcessDefinitionId();
         ProcessDefinition procDef = repositoryService.getProcessDefinition(definitionId);
+
         WorkflowNode startNode = getNode(repositoryService.getBpmnModel(procDef.getId())
                     .getProcessById(procDef.getKey())
-                    .getInitialFlowElement(), procDef.getKey(), true);
+                    .getInitialFlowElement(), procDef.getKey(),  true);
         
-        String key = ((ProcessDefinition)procDef).getKey();
-        FlowElement startElement = getStartFormData(definitionId, key);
+        FlowElement startElement = getStartFormData(procDef.getId(), procDef.getKey());
         String taskDefId = null;
         if(startElement instanceof StartEvent)
         {
