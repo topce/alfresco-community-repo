@@ -133,11 +133,6 @@ public class AlfrescoUserTaskBpmnParseHandler extends AbstractBpmnParseHandler<U
                     .map(listener -> (TaskListener) listener.getInstance())
                     .collect(Collectors.toList());
 
-        if (taskEventListeners.isEmpty()) {
-            ActivitiListener activitiListener = new ActivitiListener();
-            activitiListener.setEvent(eventName);
-            userTask.getTaskListeners().add(activitiListener);
-        }
         return taskEventListeners;
     }
 }
