@@ -205,7 +205,7 @@ public class ActivitiTypeConverter
         // Fetch node based on cached process-definition
         ProcessDefinitionEntityImpl procDef = (ProcessDefinitionEntityImpl) repositoryService.getProcessDefinition(task.getProcessDefinitionId());
 
-        WorkflowNode node = convert(repositoryService.getBpmnModel(procDef.getId()).getFlowElement(procDef.getKey()), true);
+        WorkflowNode node = convert(repositoryService.getBpmnModel(procDef.getId()).getFlowElement(task.getTaskDefinitionKey()), procDef.getId(), true);
         
         return factory.createTaskDefinition(taskDefId, node, taskDefId, false);
     }
@@ -229,7 +229,7 @@ public class ActivitiTypeConverter
     		 if(activity instanceof UserTask)
     		 {
     			 String formKey = getFormKey((UserTask) activity);
-    			 WorkflowNode node = convert(activity);
+    			 WorkflowNode node = convert(activity, procDef.getId());
     			 return factory.createTaskDefinition(formKey, node, formKey, false);
     		 }
     	 }
@@ -319,6 +319,12 @@ public class ActivitiTypeConverter
          return getNode(activity, key, forceIsTaskNode);
     }
 
+    public WorkflowNode convert(FlowElement activity, String procDefId, boolean forceIsTaskNode)
+    {
+        String key = repositoryService.getProcessDefinition(procDefId).getKey();
+        return getNode(activity, key, forceIsTaskNode);
+    }
+
     /**
      * @param activity PvmActivity
      * @param key String
@@ -351,6 +357,10 @@ public class ActivitiTypeConverter
        return convert(activity, false);
     }
 
+    public WorkflowNode convert(FlowElement activity, String procDefId)
+    {
+        return convert(activity, procDefId, false);
+    }
     public List<WorkflowPath> convertExecution(List<Execution> executions)
     {
         ArrayList<WorkflowPath> results = new ArrayList<WorkflowPath>(executions.size());
@@ -649,7 +659,7 @@ public class ActivitiTypeConverter
         WorkflowNode startNode = convert(repositoryService
                     .getBpmnModel(procDef.getId())
                     .getProcessById(procDef.getKey())
-                    .getInitialFlowElement(), true);
+                    .getInitialFlowElement(), procDef.getId(), true);
         
         String taskDefId = activitiUtil.getStartFormKey(historicProcessInstance.getProcessDefinitionId());
         WorkflowTaskDefinition taskDef = factory.createTaskDefinition(taskDefId, startNode, taskDefId, true);
@@ -742,9 +752,9 @@ public class ActivitiTypeConverter
     private WorkflowNode buildHistoricTaskWorkflowNode(HistoricTaskInstance historicTaskInstance) 
     {
     	ProcessDefinition procDef = repositoryService.getProcessDefinition(historicTaskInstance.getProcessDefinitionId());
-        FlowElement flowElement = repositoryService.getBpmnModel(procDef.getId()).getFlowElement(procDef.getKey());
+        FlowElement flowElement = repositoryService.getBpmnModel(procDef.getId()).getFlowElement(historicTaskInstance.getTaskDefinitionKey());
 
-		return convert(flowElement);
+		return convert(flowElement, procDef.getId());
 	}
 
 	public WorkflowPath buildCompletedPath(String executionId, String processInstanceId)

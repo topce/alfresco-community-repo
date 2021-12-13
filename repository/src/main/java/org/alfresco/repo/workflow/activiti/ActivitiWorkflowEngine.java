@@ -763,7 +763,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
             }
             else
             {
-                List<Task> tasks = taskService.createTaskQuery().executionId(executionId).list();
+                List<Task> tasks = taskService.createTaskQuery().processInstanceId(executionId).list();
                 for (Task task : tasks)
                 {
                     resultList.add(typeConverter.convert(task));
@@ -1444,11 +1444,11 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
         // this is a workaround for processes without any task/waitstates that should otherwise end
         // when they are started.
         ProcessInstance processInstance = activitiUtil.getProcessInstance(processInstanceId);
-        String currentActivity = ((ExecutionEntity)processInstance).getActivityId();
+        String currentActivity = taskService.createTaskQuery().processInstanceId(processInstanceId).singleResult().getTaskDefinitionKey();
         
         ProcessDefinition procDef = repoService.getProcessDefinition(processInstance.getProcessDefinitionId());
-        FlowElement activity = repoService.getBpmnModel(procDef.getId()).getFlowElement(procDef.getKey());
-        if(isReceiveTask(activity) && isFirstActivity(activity, procDef)) 
+        FlowElement activity = repoService.getBpmnModel(procDef.getId()).getFlowElement(currentActivity);
+        if(isReceiveTask(activity) && isFirstActivity(activity, procDef))
         {
             // Signal the process to start flowing, beginning from the recieve task
             runtimeService.trigger(processInstanceId);
