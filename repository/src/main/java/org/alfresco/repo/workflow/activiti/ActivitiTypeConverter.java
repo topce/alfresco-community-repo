@@ -39,6 +39,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Optional;
 
 import org.activiti.bpmn.model.*;
 import org.activiti.bpmn.model.Process;
@@ -835,11 +836,12 @@ public class ActivitiTypeConverter
             }
 
             // Process outgoing transitions
-            if(currentActivity.getSubProcess().getOutgoingFlows() != null)
+            List<SequenceFlow> outgoingFlows = ((FlowNode) currentActivity).getOutgoingFlows();
+            if(outgoingFlows != null)
             {
-                for(SequenceFlow transition : currentActivity.getSubProcess().getOutgoingFlows())
+                for(SequenceFlow transition : outgoingFlows)
                 {
-                    if(transition.getSubProcess() != null)
+                    if(transition.getTargetFlowElement() != null)
                     {
                         findUserTasks(transition.getTargetFlowElement(), userTasks, processedActivities);
                     }
@@ -848,7 +850,13 @@ public class ActivitiTypeConverter
 
             if (isSubProcess(currentActivity))
             {
-                findUserTasks(currentActivity.getSubProcess(), userTasks, processedActivities);
+                Optional<FlowElement> startEvent =
+                            ((SubProcess) currentActivity)
+                                        .getFlowElements()
+                                        .stream()
+                                        .filter(flowElement -> flowElement instanceof StartEvent)
+                                        .findFirst();
+                startEvent.ifPresent(flowElement -> findUserTasks(flowElement, userTasks, processedActivities));
             }
         }
     }
