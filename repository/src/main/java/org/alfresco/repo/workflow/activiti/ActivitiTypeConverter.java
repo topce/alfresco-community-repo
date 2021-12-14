@@ -50,12 +50,12 @@ import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityImpl;
-import org.activiti.engine.impl.util.ProcessDefinitionUtil;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
+import org.alfresco.repo.tenant.TenantService;
 import org.alfresco.repo.tenant.TenantUtil;
 import org.alfresco.repo.workflow.WorkflowObjectFactory;
 import org.alfresco.repo.workflow.activiti.properties.ActivitiPropertyConverter;
@@ -160,6 +160,10 @@ public class ActivitiTypeConverter
         int version = definition.getVersion();
         String defaultTitle = definition.getName();
 
+        if (activitiUtil.isMultiTenantWorkflowDeploymentEnabled() && !TenantUtil.isDefaultTenantName(defName)) {
+            defName = defName.substring(defName.lastIndexOf(TenantService.SEPARATOR) + 1);
+        }
+
         String startTaskName = null;
         Process process = repositoryService.getBpmnModel(defId)
                                            .getProcessById(defName);
@@ -170,13 +174,12 @@ public class ActivitiTypeConverter
             startTaskName = startEvent.getFormKey();
         }
 
-
         ProcessDefinition def = repositoryService.getProcessDefinition(defId);
         FlowElement startEvent = repositoryService
                     .getBpmnModel(def.getId())
-                    .getProcessById(def.getKey())
+                    .getProcessById(defName)
                     .getInitialFlowElement();
-        WorkflowTaskDefinition startTask = getTaskDefinition(startEvent, startTaskName, definition.getKey(), true);
+        WorkflowTaskDefinition startTask = getTaskDefinition(startEvent, startTaskName, defName, true);
         
         return factory.createDefinition(defId,
                     defName, version, defaultTitle,
