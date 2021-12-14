@@ -686,8 +686,8 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
 
         String startTaskName = null;
         StartEvent startEvent = null;
-        Process process = ProcessDefinitionUtil.getBpmnModel(processDefinition.getId())
-                    .getProcessById(processDefinition.getName());
+        Process process = repoService.getBpmnModel(processDefinition.getId())
+                    .getProcessById(processDefinition.getKey());
         FlowElement startElement = process.getInitialFlowElement();
         if(startElement instanceof StartEvent)
         {
