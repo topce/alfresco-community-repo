@@ -1444,7 +1444,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
         // this is a workaround for processes without any task/waitstates that should otherwise end
         // when they are started.
         ProcessInstance processInstance = activitiUtil.getProcessInstance(processInstanceId);
-        String currentActivity = taskService.createTaskQuery().processInstanceId(processInstanceId).singleResult().getTaskDefinitionKey();
+        String currentActivity = taskService.createTaskQuery().processInstanceId(processInstanceId).list().get(0).getTaskDefinitionKey();
         
         ProcessDefinition procDef = repoService.getProcessDefinition(processInstance.getProcessDefinitionId());
         FlowElement activity = repoService.getBpmnModel(procDef.getId()).getFlowElement(currentActivity);
