@@ -436,7 +436,7 @@
         <dependency>
             <groupId>org.activiti</groupId>
             <artifactId>activiti-engine</artifactId>
-            <version>${dependency.activiti-engine.version}</version>
+            <version>${dependency.activiti.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.mybatis</groupId>
