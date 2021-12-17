@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Repository
  * %%
- * Copyright (C) 2005 - 2016 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software. 
  * If the software was purchased under a paid Alfresco license, the terms of 
@@ -37,11 +37,9 @@
  */
 package org.alfresco.repo.workflow.activiti;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.activiti.bpmn.model.ActivitiListener;
 import org.activiti.bpmn.model.BaseElement;
+import org.activiti.bpmn.model.ImplementationType;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.engine.delegate.TaskListener;
 import org.activiti.engine.impl.bpmn.behavior.MultiInstanceActivityBehavior;
@@ -74,7 +72,7 @@ public class AlfrescoUserTaskBpmnParseHandler extends AbstractBpmnParseHandler<U
         if (userTask.getBehavior() instanceof UserTaskActivityBehavior)
         {
             addListeners(userTask);
-        } 
+        }
         else if(userTask.getBehavior() instanceof MultiInstanceActivityBehavior)
         {
             MultiInstanceActivityBehavior multiInstance = (MultiInstanceActivityBehavior) userTask.getBehavior();
@@ -89,15 +87,15 @@ public class AlfrescoUserTaskBpmnParseHandler extends AbstractBpmnParseHandler<U
     {
         if (createTaskListener != null)
         {
-            addTaskListenerAsFirst(createTaskListener, TaskListener.EVENTNAME_CREATE, userTask);
+            addTaskListenerAsFirst("${createTaskListener}", TaskListener.EVENTNAME_CREATE, userTask);
         }
         if (completeTaskListener != null)
         {
-            addTaskListenerAsFirst(completeTaskListener, TaskListener.EVENTNAME_COMPLETE, userTask);
+            addTaskListenerAsFirst("${completeTaskListener}", TaskListener.EVENTNAME_COMPLETE, userTask);
         }
         if(notificationTaskListener != null)
         {
-            addTaskListenerAsLast(notificationTaskListener, TaskListener.EVENTNAME_CREATE, userTask);
+            addTaskListenerAsLast("${taskNotificationListener}", TaskListener.EVENTNAME_CREATE, userTask);
         }
     }
     
@@ -115,24 +113,24 @@ public class AlfrescoUserTaskBpmnParseHandler extends AbstractBpmnParseHandler<U
     {
         this.notificationTaskListener = notificationTaskListener;
     }
-    
-    protected void addTaskListenerAsFirst(TaskListener taskListener, String eventName, UserTask userTask)
-    {
-        getOrCreateListenerList(eventName, userTask).add(0, taskListener);
-    }
-    
-    protected void addTaskListenerAsLast(TaskListener taskListener, String eventName, UserTask userTask)
-    {
-        getOrCreateListenerList(eventName, userTask).add(taskListener);
-    }
-    
-    protected List<TaskListener> getOrCreateListenerList(String eventName, UserTask userTask)
-    {
-        List<TaskListener> taskEventListeners = userTask.getTaskListeners().stream()
-                    .filter(listener -> eventName.equals(listener.getEvent()))
-                    .map(listener -> (TaskListener) listener.getInstance())
-                    .collect(Collectors.toList());
 
-        return taskEventListeners;
+
+    protected void addTaskListenerAsFirst(String implementation, String eventName, UserTask userTask)
+    {
+        userTask.getTaskListeners().add(0, createActivitiListener(eventName, implementation));
     }
+    
+    protected void addTaskListenerAsLast(String implementation, String eventName, UserTask userTask)
+    {
+        userTask.getTaskListeners().add(createActivitiListener(eventName, implementation));
+    }
+
+    protected ActivitiListener createActivitiListener(String eventName, String implementation){
+        ActivitiListener activitiListener = new ActivitiListener();
+        activitiListener.setEvent(eventName);
+        activitiListener.setImplementation(implementation);
+        activitiListener.setImplementationType(ImplementationType.IMPLEMENTATION_TYPE_DELEGATEEXPRESSION);
+        return activitiListener;
+    }
+
 }

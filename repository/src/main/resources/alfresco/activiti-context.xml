@@ -224,6 +224,14 @@
         <property name="namespaceService" ref="NamespaceService" />
     </bean>
 
+    <!-- ExpressionManager Beans Injector-->
+    <bean id="alfrescoExpressionManagerBeansInjector" class="org.alfresco.repo.workflow.activiti.AlfrescoExpressionManagerBeansInjector" init-method="init" depends-on="activitiUserTaskParseHandler">
+        <property name="alfrescoProcessEngineConfiguration" ref="activitiProcessEngineConfiguration" />
+        <property name="createTaskListener" ref="activitiCreateTaskListener" />
+        <property name="completeTaskListener" ref="activitiCompleteTaskListener" />
+        <property name="taskNotificationListener" ref="activitiTaskNotificationListener" />
+    </bean>
+
     <bean id="activitiCreateTaskListener"
         class="org.alfresco.repo.workflow.activiti.tasklistener.TaskCreateListener"
         depends-on="activitiWorkflowManager">
