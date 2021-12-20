@@ -3,7 +3,7 @@
   <process id="support_demo_process" name="Test with subprocess" isExecutable="true">
     <startEvent id="alfrescoStartevent1" name="Alfresco start" activiti:formKey="wf:submitAdhocTask"></startEvent>
     <subProcess id="subprocess1" name="Sub Process">
-      <userTask id="alfrescoUsertask1" name="Alfresco User Task" activiti:assignee="${initiator.exists() ? initiator.properties.userName : 'admin'}" activiti:formKey="wf:adhocTask"></userTask>
+      <userTask id="alfrescoUsertask1" name="Alfresco User Task" activiti:assignee="${initiator != null ? initiator : 'admin'}" activiti:formKey="wf:adhocTask"></userTask>
       <startEvent id="startevent1" name="Start"></startEvent>
       <endEvent id="endevent1" name="End"></endEvent>
       <sequenceFlow id="flow2" sourceRef="startevent1" targetRef="alfrescoUsertask1"></sequenceFlow>
