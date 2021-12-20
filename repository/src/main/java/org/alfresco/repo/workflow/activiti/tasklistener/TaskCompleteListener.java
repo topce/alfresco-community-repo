@@ -42,6 +42,8 @@ import org.alfresco.repo.workflow.activiti.ActivitiConstants;
 import org.alfresco.repo.workflow.activiti.properties.ActivitiPropertyConverter;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.NamespaceService;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.extensions.surf.util.AbstractLifecycleBean;
 
 /**
  * Tasklistener that is notified when a task completes.
@@ -52,13 +54,14 @@ import org.alfresco.service.namespace.NamespaceService;
  * @author Frederik Heremans
  * @since 3.4.e
  */
-public class TaskCompleteListener implements TaskListener
+public class TaskCompleteListener extends AbstractLifecycleBean implements TaskListener
 {
     private static final long serialVersionUID = 1L;
     
     private ActivitiPropertyConverter propertyConverter;
     private WorkflowQNameConverter qNameConverter;
-    
+    private Map<Object, Object> activitiBeanRegistry;
+
     @Override
     public void notify(DelegateTask task)
     {
@@ -113,6 +116,24 @@ public class TaskCompleteListener implements TaskListener
     public void setPropertyConverter(ActivitiPropertyConverter propertyConverter)
     {
         this.propertyConverter = propertyConverter;
+    }
+
+    /**
+     * @param activitiBeanRegistry the activitiBeanRegistry to set
+     */
+    public void setActivitiBeanRegistry(Map<Object, Object> activitiBeanRegistry)
+    {
+        this.activitiBeanRegistry = activitiBeanRegistry;
+    }
+
+    @Override protected void onBootstrap(ApplicationEvent applicationEvent)
+    {
+        this.activitiBeanRegistry.put("completeTaskListener", this);
+    }
+
+    @Override protected void onShutdown(ApplicationEvent applicationEvent)
+    {
+
     }
 }
 
