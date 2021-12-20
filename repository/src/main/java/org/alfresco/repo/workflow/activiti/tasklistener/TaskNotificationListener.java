@@ -28,6 +28,7 @@ package org.alfresco.repo.workflow.activiti.tasklistener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.activiti.engine.delegate.DelegateTask;
 import org.activiti.engine.delegate.TaskListener;
@@ -41,6 +42,8 @@ import org.alfresco.repo.workflow.activiti.ActivitiScriptNode;
 import org.alfresco.repo.workflow.activiti.properties.ActivitiPropertyConverter;
 import org.alfresco.service.cmr.dictionary.TypeDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.extensions.surf.util.AbstractLifecycleBean;
 
 /**
  * Tasklistener that is notified when a task is created, will send email-notification
@@ -49,13 +52,14 @@ import org.alfresco.service.cmr.repository.NodeRef;
  * @author Frederik Heremans
  * @since 4.2
  */
-public class TaskNotificationListener implements TaskListener
+public class TaskNotificationListener extends AbstractLifecycleBean implements TaskListener
 {
     private static final long serialVersionUID = 1L;
     
     private WorkflowNotificationUtils workflowNotificationUtils;
     private ActivitiPropertyConverter propertyConverter;
-    
+    private Map<Object, Object> activitiBeanRegistry;
+
     /**
      * @param service  the service registry
      */
@@ -171,5 +175,23 @@ public class TaskNotificationListener implements TaskListener
     {
         TaskEntity taskEntity = (TaskEntity) task;
         return taskEntity.getFormKey();
+    }
+
+    /**
+     * @param activitiBeanRegistry the activitiBeanRegistry to set
+     */
+    public void setActivitiBeanRegistry(Map<Object, Object> activitiBeanRegistry)
+    {
+        this.activitiBeanRegistry = activitiBeanRegistry;
+    }
+
+    @Override protected void onBootstrap(ApplicationEvent applicationEvent)
+    {
+        this.activitiBeanRegistry.put("taskNotificationListener", this);
+    }
+
+    @Override protected void onShutdown(ApplicationEvent applicationEvent)
+    {
+
     }
 }
