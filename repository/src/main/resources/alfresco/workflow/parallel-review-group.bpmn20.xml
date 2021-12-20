@@ -140,7 +140,7 @@
             </extensionElements>
             <humanPerformer>
                 <resourceAssignmentExpression>
-                    <formalExpression>${initiator.exists() ? initiator.properties.userName : 'admin'}</formalExpression>
+                    <formalExpression>${initiator != null ? initiator : 'admin'}</formalExpression>
                 </resourceAssignmentExpression>
             </humanPerformer>
         </userTask>
@@ -170,7 +170,7 @@
             </extensionElements>
             <humanPerformer>
                 <resourceAssignmentExpression>
-                    <formalExpression>${initiator.exists() ? initiator.properties.userName : 'admin'}</formalExpression>
+                    <formalExpression>${initiator != null ? initiator : 'admin'}</formalExpression>
                 </resourceAssignmentExpression>
             </humanPerformer>
         </userTask>

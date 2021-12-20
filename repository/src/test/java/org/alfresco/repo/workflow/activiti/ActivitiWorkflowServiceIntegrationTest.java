@@ -104,7 +104,7 @@ public class ActivitiWorkflowServiceIntegrationTest extends AbstractWorkflowServ
         workflowService.endTask(startTask.getId(), null);
         
         List<WorkflowPath> paths = workflowService.getWorkflowPaths(instanceId);
-        assertEquals(1, paths.size());
+        assertEquals(2, paths.size());
         path = paths.get(0);
         
         List<WorkflowTask> tasks = workflowService.getTasksForWorkflowPath(path.getId());
