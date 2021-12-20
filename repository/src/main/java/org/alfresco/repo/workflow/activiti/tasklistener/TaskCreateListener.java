@@ -36,10 +36,6 @@ import org.alfresco.repo.workflow.activiti.ActivitiConstants;
 import org.alfresco.repo.workflow.activiti.ActivitiScriptNode;
 import org.alfresco.repo.workflow.activiti.properties.ActivitiPropertyConverter;
 import org.alfresco.service.cmr.dictionary.TypeDefinition;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.extensions.surf.util.AbstractLifecycleBean;
-
-import java.util.Map;
 
 /**
  * Tasklistener that is notified when a task is created. This will set all
@@ -48,12 +44,11 @@ import java.util.Map;
  * @author Frederik Heremans
  * @since 3.4.e
  */
-public class TaskCreateListener extends AbstractLifecycleBean implements TaskListener
+public class TaskCreateListener extends AbstractTaskListener implements TaskListener
 {
     private static final long serialVersionUID = 1L;
     
     private ActivitiPropertyConverter propertyConverter;
-    private Map<Object, Object> activitiBeanRegistry;
 
     @Override
     public void notify(DelegateTask task)
@@ -92,21 +87,8 @@ public class TaskCreateListener extends AbstractLifecycleBean implements TaskLis
         this.propertyConverter = propertyConverter;
     }
 
-    /**
-     * @param activitiBeanRegistry the activitiBeanRegistry to set
-     */
-    public void setActivitiBeanRegistry(Map<Object, Object> activitiBeanRegistry)
+    @Override protected String beanRegistryKey()
     {
-        this.activitiBeanRegistry = activitiBeanRegistry;
-    }
-
-    @Override protected void onBootstrap(ApplicationEvent applicationEvent)
-    {
-        this.activitiBeanRegistry.put("createTaskListener", this);
-    }
-
-    @Override protected void onShutdown(ApplicationEvent applicationEvent)
-    {
-
+        return "createTaskListener";
     }
 }
