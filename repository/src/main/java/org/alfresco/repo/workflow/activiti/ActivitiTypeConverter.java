@@ -665,7 +665,7 @@ public class ActivitiTypeConverter
                     .getProcessById(procDef.getKey())
                     .getInitialFlowElement(), procDef.getId(), true);
         
-        String taskDefId = activitiUtil.getStartFormKey(historicProcessInstance.getProcessDefinitionId());
+        String taskDefId = activitiUtil.getStartTaskTypeName(historicProcessInstance.getProcessDefinitionId());
         WorkflowTaskDefinition taskDef = factory.createTaskDefinition(taskDefId, startNode, taskDefId, true);
         
         boolean completed = historicProcessInstance.getEndTime() != null;
