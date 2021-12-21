@@ -55,7 +55,7 @@ public class TaskCreateListener extends AbstractTaskListener implements TaskList
         // Set all default properties, based on the type-definition
         propertyConverter.setDefaultTaskProperties(task);
 
-        String taskFormKey = getFormKey(task);
+        String taskFormKey = task.getFormKey();
 
         // Fetch definition and extract name again. Possible that the default is used if the provided is missing
         TypeDefinition typeDefinition = propertyConverter.getWorkflowObjectFactory().getTaskTypeDefinition(taskFormKey, false);
@@ -72,12 +72,6 @@ public class TaskCreateListener extends AbstractTaskListener implements TaskList
             task.addUserIdentityLink((String) initiatorNode.getProperties().get(ContentModel.PROP_USERNAME.toPrefixString()),
                         IdentityLinkType.STARTER);
         }
-    }
-
-    private String getFormKey(DelegateTask task)
-    {
-        TaskEntity taskEntity = (TaskEntity) task;
-        return taskEntity.getTaskDefinitionKey();
     }
 
     /**
