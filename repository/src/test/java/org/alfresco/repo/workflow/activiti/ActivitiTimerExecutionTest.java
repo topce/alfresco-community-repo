@@ -172,10 +172,8 @@ public class ActivitiTimerExecutionTest extends BaseSpringTest
     		String processInstanceId = BPMEngineRegistry.getLocalId(workflowInstance.getId());
     		
     		// Check the timer, should have "error" set in it
-			activitiProcessEngine.getManagementService();
-
 			TimerJobEntity timer =  (TimerJobEntity) activitiProcessEngine.getManagementService()
-				.createJobQuery().timers()
+				.createTimerJobQuery().timers()
 				.processInstanceId(processInstanceId).singleResult();
     		
     		int numberOfRetries = 5;
@@ -187,13 +185,13 @@ public class ActivitiTimerExecutionTest extends BaseSpringTest
     			}
     			Thread.sleep(1000);
     			timer =  (TimerJobEntity) activitiProcessEngine.getManagementService()
-    				.createJobQuery().timers()
+    				.createTimerJobQuery().timers()
     				.processInstanceId(processInstanceId).singleResult();
     		}
     		assertNotNull("Job should have exception message set", timer.getExceptionMessage());
-                		
-    		// Check if exception is the one we deliberately caused
-    		String fullExceptionStacktrace = activitiProcessEngine.getManagementService().getJobExceptionStacktrace(timer.getId());
+
+			// Check if exception is the one we deliberately caused
+			String fullExceptionStacktrace = activitiProcessEngine.getManagementService().getTimerJobExceptionStacktrace(timer.getId());
     		assertTrue(fullExceptionStacktrace.contains("Activiti engine rocks!"));
     		
     		// Check if alfresco-changes that were performed are rolled back
@@ -279,7 +277,7 @@ public class ActivitiTimerExecutionTest extends BaseSpringTest
 		for (int i=0; i< numberOfRetries; i++)
 		{
 			Thread.sleep(1500);
-			timers = activitiProcessEngine.getManagementService().createJobQuery()
+			timers = activitiProcessEngine.getManagementService().createTimerJobQuery()
 			   .timers()
 			   .processInstanceId(processInstanceId)
 			   .list();
