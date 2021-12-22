@@ -794,7 +794,7 @@ public class ActivitiWorkflowEngine extends BPMEngine implements WorkflowEngine
              List<WorkflowTimer> timers = new ArrayList<WorkflowTimer>();
              
              String processInstanceId = createLocalId(workflowId);
-             List<Job> timerJobs = managementService.createJobQuery()
+             List<Job> timerJobs = managementService.createTimerJobQuery()
                  .processInstanceId(processInstanceId)
                  .timers()
                  .list();

@@ -689,7 +689,7 @@ public class ActivitiWorkflowComponentTest extends AbstractActivitiComponentTest
                     processInstance.getProcessInstanceId());
         
         // Query the timer in activity to have reference
-        Job timerJob = managementService.createJobQuery().timers().processInstanceId(processInstance.getId()).singleResult();
+        Job timerJob = managementService.createTimerJobQuery().timers().processInstanceId(processInstance.getId()).singleResult();
         String globalJobId = BPMEngineRegistry.createGlobalId(ActivitiConstants.ENGINE_ID, timerJob.getId());
         
         // Ask workflowEngine for timers
