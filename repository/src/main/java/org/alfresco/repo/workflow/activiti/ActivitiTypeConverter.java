@@ -309,7 +309,7 @@ public class ActivitiTypeConverter
             ProcessDefinition procDef = repositoryService.getProcessDefinition(instance.getProcessDefinitionId());
             FlowElement activity = repositoryService.getBpmnModel(procDef.getId())
                         .getProcessById(procDef.getKey())
-                        .getInitialFlowElement();
+                        .getFlowElement(nodeIds.get(0));
             node = getNode(activity, procDef.getKey(), false);
         }
 
