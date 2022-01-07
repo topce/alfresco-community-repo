@@ -56,14 +56,7 @@ public class ScriptExecutionListener extends DelegateExecutionScriptBase impleme
     @Override
     public void notify(DelegateExecution execution)
     {
-        try
-        {
             runScript(execution);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
     }
     
     @Override

@@ -2,23 +2,23 @@
  * #%L
  * Alfresco Repository
  * %%
- * Copyright (C) 2005 - 2016 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
- * This file is part of the Alfresco software. 
- * If the software was purchased under a paid Alfresco license, the terms of 
- * the paid license agreement will prevail.  Otherwise, the software is 
+ * This file is part of the Alfresco software.
+ * If the software was purchased under a paid Alfresco license, the terms of
+ * the paid license agreement will prevail.  Otherwise, the software is
  * provided under the following open source license terms:
- * 
+ *
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Alfresco is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -31,6 +31,7 @@ import java.util.List;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.impl.jobexecutor.AsyncContinuationJobHandler;
 import org.activiti.engine.impl.jobexecutor.JobHandler;
+import org.activiti.engine.impl.jobexecutor.TriggerTimerEventJobHandler;
 import org.activiti.engine.impl.variable.SerializableType;
 import org.activiti.engine.impl.variable.VariableType;
 import org.activiti.spring.SpringProcessEngineConfiguration;
@@ -48,7 +49,7 @@ public class AlfrescoProcessEngineConfiguration extends SpringProcessEngineConfi
 {
     private List<VariableType> customTypes;
     private NodeService unprotectedNodeService;
-    
+
     public AlfrescoProcessEngineConfiguration()
     {
         // Make sure the synchornizationAdapter is run before the AlfrescoTransactionSupport (and also before the
@@ -58,7 +59,8 @@ public class AlfrescoProcessEngineConfiguration extends SpringProcessEngineConfi
     }
 
     @Override
-    protected void autoDeployResources(ProcessEngine processEngine){
+    protected void autoDeployResources(ProcessEngine processEngine)
+    {
         if (this.deploymentResources != null && this.deploymentResources.length > 0)
         {
             final AutoDeploymentStrategy strategy = getAutoDeploymentStrategy(deploymentMode);
@@ -74,55 +76,58 @@ public class AlfrescoProcessEngineConfiguration extends SpringProcessEngineConfi
         if (customTypes != null)
         {
             int serializableIndex = variableTypes.getTypeIndex(SerializableType.TYPE_NAME);
-            for (VariableType type : customTypes) 
+            for (VariableType type : customTypes)
             {
                 variableTypes.addType(type, serializableIndex);
             }
         }
-        
+
         // WOR-171: Replace string type by custom one to handle large text-values
         int stringIndex = variableTypes.getTypeIndex("string");
         variableTypes.removeType(variableTypes.getVariableType("string"));
         variableTypes.addType(new CustomStringVariableType(), stringIndex);
     }
-    
-//    @Override
-//    protected void initJobExecutor()
-//    {
-//        super.initJobExecutor();
-//
-//        // Wrap timer-job handler to handle authentication
-//        JobHandler timerJobHandler = jobHandlers.get(TimerExecuteNestedActivityJobHandler.TYPE);
-//        JobHandler wrappingTimerJobHandler = new AuthenticatedTimerJobHandler(timerJobHandler, unprotectedNodeService);
-//        jobHandlers.put(TimerExecuteNestedActivityJobHandler.TYPE, wrappingTimerJobHandler);
-//
-//        // Wrap async-job handler to handle authentication
-//        JobHandler asyncJobHandler = jobHandlers.get(AsyncContinuationJobHandler.TYPE);
-//        JobHandler wrappingAsyncJobHandler = new AuthenticatedAsyncJobHandler(asyncJobHandler);
-//        jobHandlers.put(AsyncContinuationJobHandler.TYPE, wrappingAsyncJobHandler);
-//
-//        // Wrap intermediate-timer-job handler to handle authentication
-//        JobHandler intermediateJobHandler = jobHandlers.get(TimerCatchIntermediateEventJobHandler.TYPE);
-//        JobHandler wrappingIntermediateJobHandler = new AuthenticatedAsyncJobHandler(intermediateJobHandler);
-//        jobHandlers.put(TimerCatchIntermediateEventJobHandler.TYPE, wrappingIntermediateJobHandler);
-//
-//    }
-    
+
+    @Override
+    public void initAsyncExecutor()
+    {
+        super.initAsyncExecutor();
+
+        // Wrap timer-job handler to handle authentication
+        JobHandler timerJobHandler = jobHandlers.get(TriggerTimerEventJobHandler.TYPE);
+        JobHandler wrappingTimerJobHandler = new AuthenticatedTimerJobHandler(timerJobHandler, unprotectedNodeService);
+        jobHandlers.put(TriggerTimerEventJobHandler.TYPE, wrappingTimerJobHandler);
+
+        // Wrap async-job handler to handle authentication
+        JobHandler asyncJobHandler = jobHandlers.get(AsyncContinuationJobHandler.TYPE);
+        JobHandler wrappingAsyncJobHandler = new AuthenticatedAsyncJobHandler(asyncJobHandler);
+        jobHandlers.put(AsyncContinuationJobHandler.TYPE, wrappingAsyncJobHandler);
+
+    }
+
     public void setCustomTypes(List<VariableType> customTypes)
     {
         this.customTypes = customTypes;
     }
-    
+
     public void setUnprotectedNodeService(NodeService unprotectedNodeService)
     {
         this.unprotectedNodeService = unprotectedNodeService;
     }
-
 
     @Override
     public void initDatabaseType()
     {
         databaseTypeMappings.setProperty("MariaDB", DATABASE_TYPE_MYSQL);
         super.initDatabaseType();
+    }
+
+    @Override
+    public void initAgendaFactory()
+    {
+        if (this.engineAgendaFactory == null)
+        {
+            this.engineAgendaFactory = new AlfrescoActivitiEngineAgendaFactory();
+        }
     }
 }

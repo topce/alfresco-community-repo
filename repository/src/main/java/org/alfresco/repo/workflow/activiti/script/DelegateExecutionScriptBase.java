@@ -53,7 +53,7 @@ public class DelegateExecutionScriptBase extends ActivitiScriptBase
     /**
      *  Run the script that is configured, using the given execution.
      */
-    protected void runScript(DelegateExecution execution) throws Exception 
+    protected void runScript(DelegateExecution execution)
     {
         if (script != null)
         {
