@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Repository
  * %%
- * Copyright (C) 2005 - 2016 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software. 
  * If the software was purchased under a paid Alfresco license, the terms of 
@@ -98,7 +98,7 @@ public class ActivitiTimerExecutionTest extends BaseSpringTest
 	    			{
 	    				// Create test person
 	    				personManager.createPerson(USER1);
-	    				
+
 	    				WorkflowDefinition definition = deployDefinition("activiti/testTimerTransaction.bpmn20.xml");
 	    				
 	    				// Start the test timer transaction process, with 'error' = false, expecting a timer job
@@ -117,9 +117,10 @@ public class ActivitiTimerExecutionTest extends BaseSpringTest
     		
     		// No timers should be available after a while they should have been executed, otherwise test fails
     		waitForTimersToBeExecuted(taskAssigneeWorkflowInstance.getId());
-    		
-    		// Test assigned task
-    		WorkflowPath path =	workflowService.getWorkflowPaths(taskAssigneeWorkflowInstance.getId()).get(0);
+			Thread.sleep(5000);
+
+			// Test assigned task
+			WorkflowPath path =	workflowService.getWorkflowPaths(taskAssigneeWorkflowInstance.getId()).get(0);
     		
     		// Check if job executed without exception, process should be waiting in "waitTask"
     		List<WorkflowTask> tasks = workflowService.getTasksForWorkflowPath(path.getId());
@@ -179,15 +180,16 @@ public class ActivitiTimerExecutionTest extends BaseSpringTest
     		int numberOfRetries = 5;
     		for (int i = 0; i < numberOfRetries; i++)
     		{
-    			if (timer.getExceptionMessage() != null && timer.getRetries() == 0)
+    			if (timer != null && timer.getExceptionMessage() != null && timer.getRetries() == 0)
     			{
     				break;
     			}
-    			Thread.sleep(1000);
+				Thread.sleep(1500);
     			timer =  (TimerJobEntity) activitiProcessEngine.getManagementService()
     				.createTimerJobQuery().timers()
     				.processInstanceId(processInstanceId).singleResult();
     		}
+
     		assertNotNull("Job should have exception message set", timer.getExceptionMessage());
 
 			// Check if exception is the one we deliberately caused
@@ -276,8 +278,8 @@ public class ActivitiTimerExecutionTest extends BaseSpringTest
 		int numberOfRetries = 5;
 		for (int i=0; i< numberOfRetries; i++)
 		{
-			Thread.sleep(1500);
-			timers = activitiProcessEngine.getManagementService().createTimerJobQuery()
+			Thread.sleep(6000);
+			timers = activitiProcessEngine.getManagementService().createJobQuery()
 			   .timers()
 			   .processInstanceId(processInstanceId)
 			   .list();
