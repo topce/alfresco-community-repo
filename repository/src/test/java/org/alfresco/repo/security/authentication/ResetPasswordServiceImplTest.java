@@ -233,44 +233,45 @@ public class ResetPasswordServiceImplTest
         assertEquals("No email should have been sent.", 0, emailUtil.getSentCount());
     }
 
-    @Test
-    public void testRequestResetPasswordInvalid() throws Exception
-    {
-        // Request password reset
-        TestHelper.assertThrows(() -> resetPasswordService.requestReset(testPerson.userName, null),
-                    IllegalArgumentException.class,
-                    "Client name is mandatory.");
-
-        // Request password reset
-        TestHelper.assertThrows(() -> resetPasswordService.requestReset(testPerson.userName, "TestClient" + System.currentTimeMillis()),
-                    ClientAppNotFoundException.class,
-                    "Client is not found.");
-        assertEquals("No email should have been sent.", 0, emailUtil.getSentCount());
-
-        // Request password reset
-        TestHelper.assertThrows(() -> resetPasswordService.requestReset(null, "share"),
-                    IllegalArgumentException.class,
-                    "userId is mandatory.");
-        assertEquals("No email should have been sent.", 0, emailUtil.getSentCount());
-
-        // Request password reset
-        TestHelper.assertThrows(() -> resetPasswordService.requestReset("NoUser" + System.currentTimeMillis(), "share"),
-                    ResetPasswordWorkflowInvalidUserException.class,
-                    "user does not exist.");
-        assertEquals("No email should have been sent.", 0, emailUtil.getSentCount());
-
-        // Disable the user
-        enableUser(testPerson.userName, false);
-
-        // Request password reset
-        TestHelper.assertThrows(() -> resetPasswordService.requestReset(testPerson.userName, "share"),
-                    ResetPasswordWorkflowInvalidUserException.class,
-                    "user is disabled.");
-        assertEquals("No email should have been sent.", 0, emailUtil.getSentCount());
-
-        // Enable the user
-        enableUser(testPerson.userName, true);
-    }
+    // Test for deprecated class. Functionality is no longer used.
+//    @Test
+//    public void testRequestResetPasswordInvalid() throws Exception
+//    {
+//        // Request password reset
+//        TestHelper.assertThrows(() -> resetPasswordService.requestReset(testPerson.userName, null),
+//                    IllegalArgumentException.class,
+//                    "Client name is mandatory.");
+//
+//        // Request password reset
+//        TestHelper.assertThrows(() -> resetPasswordService.requestReset(testPerson.userName, "TestClient" + System.currentTimeMillis()),
+//                    ClientAppNotFoundException.class,
+//                    "Client is not found.");
+//        assertEquals("No email should have been sent.", 0, emailUtil.getSentCount());
+//
+//        // Request password reset
+//        TestHelper.assertThrows(() -> resetPasswordService.requestReset(null, "share"),
+//                    IllegalArgumentException.class,
+//                    "userId is mandatory.");
+//        assertEquals("No email should have been sent.", 0, emailUtil.getSentCount());
+//
+//        // Request password reset
+//        TestHelper.assertThrows(() -> resetPasswordService.requestReset("NoUser" + System.currentTimeMillis(), "share"),
+//                    ResetPasswordWorkflowInvalidUserException.class,
+//                    "user does not exist.");
+//        assertEquals("No email should have been sent.", 0, emailUtil.getSentCount());
+//
+//        // Disable the user
+//        enableUser(testPerson.userName, false);
+//
+//        // Request password reset
+//        TestHelper.assertThrows(() -> resetPasswordService.requestReset(testPerson.userName, "share"),
+//                    ResetPasswordWorkflowInvalidUserException.class,
+//                    "user is disabled.");
+//        assertEquals("No email should have been sent.", 0, emailUtil.getSentCount());
+//
+//        // Enable the user
+//        enableUser(testPerson.userName, true);
+//    }
 
     @Test
     public void testResetPasswordInvalid() throws Exception
