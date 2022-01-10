@@ -29,6 +29,7 @@ package org.alfresco.repo.workflow.activiti;
 import org.activiti.engine.ActivitiEngineAgenda;
 import org.activiti.engine.ActivitiEngineAgendaFactory;
 import org.activiti.engine.impl.interceptor.CommandContext;
+import org.alfresco.service.cmr.repository.NodeService;
 
 /**
  * @author Damian Ujma
@@ -36,12 +37,15 @@ import org.activiti.engine.impl.interceptor.CommandContext;
  */
 public class AlfrescoActivitiEngineAgendaFactory implements ActivitiEngineAgendaFactory
 {
-    public AlfrescoActivitiEngineAgendaFactory()
+    private NodeService unprotectedNodeService;
+
+    public AlfrescoActivitiEngineAgendaFactory(NodeService unprotectedNodeService)
     {
+        this.unprotectedNodeService = unprotectedNodeService;
     }
 
     public ActivitiEngineAgenda createAgenda(CommandContext commandContext)
     {
-        return new AlfrescoActivitiEngineAgenda(commandContext);
+        return new AlfrescoActivitiEngineAgenda(commandContext, unprotectedNodeService);
     }
 }

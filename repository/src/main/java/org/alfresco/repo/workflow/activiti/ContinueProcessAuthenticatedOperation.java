@@ -31,8 +31,12 @@ import org.activiti.engine.impl.agenda.ContinueProcessOperation;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.task.Task;
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.tenant.TenantUtil;
+import org.alfresco.repo.workflow.WorkflowConstants;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
 
 /**
  * @author Damian Ujma
@@ -41,9 +45,12 @@ import org.alfresco.repo.tenant.TenantUtil;
 public class ContinueProcessAuthenticatedOperation extends ContinueProcessOperation
 {
 
-    public ContinueProcessAuthenticatedOperation(CommandContext commandContext, ExecutionEntity execution)
+    private NodeService unprotectedNodeService;
+
+    public ContinueProcessAuthenticatedOperation(CommandContext commandContext, ExecutionEntity execution, NodeService unprotectedNodeService)
     {
         super(commandContext, execution);
+        this.unprotectedNodeService = unprotectedNodeService;
     }
 
     @Override public void run()
@@ -53,6 +60,32 @@ public class ContinueProcessAuthenticatedOperation extends ContinueProcessOperat
         if (tenantToRunIn != null && tenantToRunIn.trim().length() == 0)
         {
             tenantToRunIn = null;
+        }
+
+        final ActivitiScriptNode initiatorNode = (ActivitiScriptNode) execution.getVariable(WorkflowConstants.PROP_INITIATOR);
+
+        // Extracting the properties from the initiatornode should be done in correct tennant or as administrator, since we don't
+        // know who started the workflow yet (We can't access node-properties when no valid authentication context is set up).
+        if (tenantToRunIn != null)
+        {
+            userName = TenantUtil.runAsTenant(new TenantUtil.TenantRunAsWork<String>()
+            {
+                @Override public String doWork() throws Exception
+                {
+                    return getInitiator(initiatorNode);
+                }
+            }, tenantToRunIn);
+        }
+        else
+        {
+            // No tenant on worklfow, run as admin in default tenant
+            userName = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<String>()
+            {
+                @SuppressWarnings("synthetic-access") public String doWork() throws Exception
+                {
+                    return getInitiator(initiatorNode);
+                }
+            }, AuthenticationUtil.getSystemUserName());
         }
 
         // Fall back to task assignee, if no initiator is found
@@ -98,6 +131,19 @@ public class ContinueProcessAuthenticatedOperation extends ContinueProcessOperat
             }, userName);
         }
 
+    }
+
+    protected String getInitiator(ActivitiScriptNode initiatorNode)
+    {
+        if (initiatorNode != null)
+        {
+            NodeRef ref = initiatorNode.getNodeRef();
+            if (unprotectedNodeService.exists(ref))
+            {
+                return (String) unprotectedNodeService.getProperty(ref, ContentModel.PROP_USERNAME);
+            }
+        }
+        return null;
     }
 
     private void superRun()

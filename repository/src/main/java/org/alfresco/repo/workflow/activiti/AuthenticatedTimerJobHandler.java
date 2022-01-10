@@ -26,20 +26,11 @@
 
 package org.alfresco.repo.workflow.activiti;
 
-
-import org.activiti.engine.impl.TaskQueryImpl;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.jobexecutor.JobHandler;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.JobEntity;
-import org.activiti.engine.task.Task;
-import org.alfresco.model.ContentModel;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
-import org.alfresco.repo.tenant.TenantUtil;
-import org.alfresco.repo.tenant.TenantUtil.TenantRunAsWork;
-import org.alfresco.repo.workflow.WorkflowConstants;
-import org.alfresco.service.cmr.repository.NodeRef;
+
 import org.alfresco.service.cmr.repository.NodeService;
 
 /**
@@ -77,87 +68,13 @@ public class AuthenticatedTimerJobHandler implements JobHandler
         this.wrappedHandler = jobHandler;
     }
 
-    @Override
-    public void execute(final JobEntity job, final String configuration, final ExecutionEntity execution,
+    @Override public void execute(final JobEntity job, final String configuration, final ExecutionEntity execution,
                 final CommandContext commandContext)
     {
-        String userName = null;
-        String tenantToRunIn = (String) execution.getVariable(ActivitiConstants.VAR_TENANT_DOMAIN);
-        if (tenantToRunIn != null && tenantToRunIn.trim().length() == 0)
-        {
-            tenantToRunIn = null;
-        }
-
-        final ActivitiScriptNode initiatorNode = (ActivitiScriptNode) execution.getVariable(WorkflowConstants.PROP_INITIATOR);
-
-        // Extracting the properties from the initiatornode should be done in correct tennant or as administrator, since we don't
-        // know who started the workflow yet (We can't access node-properties when no valid authentication context is set up).
-        if (tenantToRunIn != null)
-        {
-            userName = TenantUtil.runAsTenant(new TenantRunAsWork<String>()
-            {
-                @Override public String doWork() throws Exception
-                {
-                    return getInitiator(initiatorNode);
-                }
-            }, tenantToRunIn);
-        }
-        else
-        {
-            // No tenant on worklfow, run as admin in default tenant
-            userName = AuthenticationUtil.runAs(new RunAsWork<String>()
-            {
-                @SuppressWarnings("synthetic-access") public String doWork() throws Exception
-                {
-                    return getInitiator(initiatorNode);
-                }
-            }, AuthenticationUtil.getSystemUserName());
-        }
-
-        // Fall back to task assignee, if no initiator is found
-        if (userName == null)
-        {
-            // Only try getting active task, if execution timer is waiting on is a userTask
-            Task task = new TaskQueryImpl(commandContext).processInstanceId(execution.getProcessInstanceId()).executeSingleResult(commandContext);
-
-            if (task != null && task.getAssignee() != null)
-            {
-                userName = task.getAssignee();
-            }
-        }
-
-        // When no task assignee is set, nor the initiator, use system user to run job
-        if (userName == null)
-        {
-            userName = AuthenticationUtil.getSystemUserName();
-            tenantToRunIn = null;
-        }
-
-        if (tenantToRunIn != null)
-        {
-            wrappedHandler.execute(job, configuration, execution, commandContext);
-        }
-        else
-        {
-            wrappedHandler.execute(job, configuration, execution, commandContext);
-        }
+        wrappedHandler.execute(job, configuration, execution, commandContext);
     }
 
-    protected String getInitiator(ActivitiScriptNode initiatorNode)
-    {
-        if (initiatorNode != null)
-        {
-            NodeRef ref = initiatorNode.getNodeRef();
-            if (unprotectedNodeService.exists(ref))
-            {
-                return (String) unprotectedNodeService.getProperty(ref, ContentModel.PROP_USERNAME);
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public String getType()
+    @Override public String getType()
     {
         return wrappedHandler.getType();
     }

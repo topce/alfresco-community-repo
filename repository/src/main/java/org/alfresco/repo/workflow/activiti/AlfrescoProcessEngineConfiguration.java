@@ -58,8 +58,7 @@ public class AlfrescoProcessEngineConfiguration extends SpringProcessEngineConfi
         super.performanceSettings.setValidateExecutionRelationshipCountConfigOnBoot(false);
     }
 
-    @Override
-    protected void autoDeployResources(ProcessEngine processEngine)
+    @Override protected void autoDeployResources(ProcessEngine processEngine)
     {
         if (this.deploymentResources != null && this.deploymentResources.length > 0)
         {
@@ -68,8 +67,7 @@ public class AlfrescoProcessEngineConfiguration extends SpringProcessEngineConfi
         }
     }
 
-    @Override
-    public void initVariableTypes()
+    @Override public void initVariableTypes()
     {
         super.initVariableTypes();
         // Add custom types before SerializableType
@@ -88,8 +86,7 @@ public class AlfrescoProcessEngineConfiguration extends SpringProcessEngineConfi
         variableTypes.addType(new CustomStringVariableType(), stringIndex);
     }
 
-    @Override
-    public void initAsyncExecutor()
+    @Override public void initAsyncExecutor()
     {
         super.initAsyncExecutor();
 
@@ -115,19 +112,17 @@ public class AlfrescoProcessEngineConfiguration extends SpringProcessEngineConfi
         this.unprotectedNodeService = unprotectedNodeService;
     }
 
-    @Override
-    public void initDatabaseType()
+    @Override public void initDatabaseType()
     {
         databaseTypeMappings.setProperty("MariaDB", DATABASE_TYPE_MYSQL);
         super.initDatabaseType();
     }
 
-    @Override
-    public void initAgendaFactory()
+    @Override public void initAgendaFactory()
     {
         if (this.engineAgendaFactory == null)
         {
-            this.engineAgendaFactory = new AlfrescoActivitiEngineAgendaFactory();
+            this.engineAgendaFactory = new AlfrescoActivitiEngineAgendaFactory(this.unprotectedNodeService);
         }
     }
 }

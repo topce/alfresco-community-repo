@@ -29,6 +29,7 @@ package org.alfresco.repo.workflow.activiti;
 import org.activiti.engine.impl.agenda.DefaultActivitiEngineAgenda;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
+import org.alfresco.service.cmr.repository.NodeService;
 
 /**
  * @author Damian Ujma
@@ -36,15 +37,16 @@ import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
  */
 public class AlfrescoActivitiEngineAgenda extends DefaultActivitiEngineAgenda
 {
+    private NodeService unprotectedNodeService;
 
-    public AlfrescoActivitiEngineAgenda(CommandContext commandContext)
+    public AlfrescoActivitiEngineAgenda(CommandContext commandContext, NodeService unprotectedNodeService)
     {
         super(commandContext);
+        this.unprotectedNodeService = unprotectedNodeService;
     }
 
-    @Override
-    public void planContinueProcessOperation(ExecutionEntity execution)
+    @Override public void planContinueProcessOperation(ExecutionEntity execution)
     {
-        this.planOperation(new ContinueProcessAuthenticatedOperation(this.commandContext, execution));
+        this.planOperation(new ContinueProcessAuthenticatedOperation(this.commandContext, execution, unprotectedNodeService));
     }
 }
