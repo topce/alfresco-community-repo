@@ -108,7 +108,8 @@ public class SiteServiceTest extends AbstractSiteServiceTest
         createUser(USER_THREE);
         createUser(USER_NUMERIC);
         createUser(USER_FOUR_AS_SITE_ADMIN);
-        
+
+        Thread.sleep(1000);
         // Add user four as a member of the site admins group
         authorityService.addAuthority("GROUP_SITE_ADMINISTRATORS", USER_FOUR_AS_SITE_ADMIN);
         
