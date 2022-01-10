@@ -31,8 +31,6 @@ import org.activiti.engine.impl.jobexecutor.JobHandler;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.JobEntity;
 
-import org.alfresco.service.cmr.repository.NodeService;
-
 /**
  * An {@link JobHandler} which executes activiti timer-jobs
  * authenticated against Alfresco. It runs the timer execution
@@ -46,25 +44,16 @@ import org.alfresco.service.cmr.repository.NodeService;
 public class AuthenticatedTimerJobHandler implements JobHandler
 {
     private JobHandler wrappedHandler;
-    private NodeService unprotectedNodeService;
 
     /**
-     * @param jobHandler  the {@link JobHandler} to wrap.
-     * @param nodeService the UNPROTECTED {@link NodeService} to use for fetching initiator username
-     *                    when only tenant is known. We can't use initiator ScriptNode for this, because this uses the
-     *                    protected {@link NodeService} which requires an authenticated user in that tenant (see {@link #getInitiator(ActivitiScriptNode)}).
+     * @param jobHandler the {@link JobHandler} to wrap.
      */
-    public AuthenticatedTimerJobHandler(JobHandler jobHandler, NodeService nodeService)
+    public AuthenticatedTimerJobHandler(JobHandler jobHandler)
     {
         if (jobHandler == null)
         {
             throw new IllegalArgumentException("JobHandler to delegate to is required");
         }
-        if (nodeService == null)
-        {
-            throw new IllegalArgumentException("NodeService is required");
-        }
-        this.unprotectedNodeService = nodeService;
         this.wrappedHandler = jobHandler;
     }
 

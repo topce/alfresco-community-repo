@@ -51,6 +51,10 @@ public class ContinueProcessAuthenticatedOperation extends ContinueProcessOperat
     {
         super(commandContext, execution);
         this.unprotectedNodeService = unprotectedNodeService;
+        if (unprotectedNodeService == null)
+        {
+            throw new IllegalArgumentException("NodeService is required");
+        }
     }
 
     @Override public void run()

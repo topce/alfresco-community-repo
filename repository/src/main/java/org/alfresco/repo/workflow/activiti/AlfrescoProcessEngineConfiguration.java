@@ -92,7 +92,7 @@ public class AlfrescoProcessEngineConfiguration extends SpringProcessEngineConfi
 
         // Wrap timer-job handler to handle authentication
         JobHandler timerJobHandler = jobHandlers.get(TriggerTimerEventJobHandler.TYPE);
-        JobHandler wrappingTimerJobHandler = new AuthenticatedTimerJobHandler(timerJobHandler, unprotectedNodeService);
+        JobHandler wrappingTimerJobHandler = new AuthenticatedTimerJobHandler(timerJobHandler);
         jobHandlers.put(TriggerTimerEventJobHandler.TYPE, wrappingTimerJobHandler);
 
         // Wrap async-job handler to handle authentication
