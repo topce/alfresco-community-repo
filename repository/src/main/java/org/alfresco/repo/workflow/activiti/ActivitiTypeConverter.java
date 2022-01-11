@@ -313,7 +313,7 @@ public class ActivitiTypeConverter
             node = getNode(activity, procDef.getKey(), false);
         }
 
-        return factory.createPath(execution.getId(), wfInstance, node, isActive);
+        return factory.createPath(instance.getId(), wfInstance, node, isActive);
     }
     
     public WorkflowNode convert(FlowElement activity, boolean forceIsTaskNode)
