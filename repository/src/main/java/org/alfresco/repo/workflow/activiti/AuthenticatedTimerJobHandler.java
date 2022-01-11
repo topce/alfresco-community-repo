@@ -31,6 +31,8 @@ import org.activiti.engine.impl.jobexecutor.JobHandler;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.JobEntity;
 
+import java.util.Map;
+
 /**
  * An {@link JobHandler} which executes activiti timer-jobs
  * authenticated against Alfresco. It runs the timer execution
@@ -43,6 +45,7 @@ import org.activiti.engine.impl.persistence.entity.JobEntity;
  */
 public class AuthenticatedTimerJobHandler implements JobHandler
 {
+    public static final String AUTHENTICATION_FLAG = "authenticationRequired";
     private JobHandler wrappedHandler;
 
     /**
@@ -60,6 +63,9 @@ public class AuthenticatedTimerJobHandler implements JobHandler
     @Override public void execute(final JobEntity job, final String configuration, final ExecutionEntity execution,
                 final CommandContext commandContext)
     {
+        Map<String, Object> variables = execution.getVariables();
+        variables.put(AUTHENTICATION_FLAG, true);
+        execution.setVariables(variables);
         wrappedHandler.execute(job, configuration, execution, commandContext);
     }
 

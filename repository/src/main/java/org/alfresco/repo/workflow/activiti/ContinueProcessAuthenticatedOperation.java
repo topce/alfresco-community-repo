@@ -59,80 +59,89 @@ public class ContinueProcessAuthenticatedOperation extends ContinueProcessOperat
 
     @Override public void run()
     {
-        String userName = null;
-        String tenantToRunIn = (String) execution.getVariable(ActivitiConstants.VAR_TENANT_DOMAIN);
-        if (tenantToRunIn != null && tenantToRunIn.trim().length() == 0)
+        if (execution.hasVariable(AuthenticatedTimerJobHandler.AUTHENTICATION_FLAG) && (Boolean) execution.getVariable(
+                    AuthenticatedTimerJobHandler.AUTHENTICATION_FLAG))
         {
-            tenantToRunIn = null;
-        }
-
-        final ActivitiScriptNode initiatorNode = (ActivitiScriptNode) execution.getVariable(WorkflowConstants.PROP_INITIATOR);
-
-        // Extracting the properties from the initiatornode should be done in correct tennant or as administrator, since we don't
-        // know who started the workflow yet (We can't access node-properties when no valid authentication context is set up).
-        if (tenantToRunIn != null)
-        {
-            userName = TenantUtil.runAsTenant(new TenantUtil.TenantRunAsWork<String>()
+            execution.removeVariable(AuthenticatedTimerJobHandler.AUTHENTICATION_FLAG);
+            String userName = null;
+            String tenantToRunIn = (String) execution.getVariable(ActivitiConstants.VAR_TENANT_DOMAIN);
+            if (tenantToRunIn != null && tenantToRunIn.trim().length() == 0)
             {
-                @Override public String doWork() throws Exception
+                tenantToRunIn = null;
+            }
+
+            final ActivitiScriptNode initiatorNode = (ActivitiScriptNode) execution.getVariable(WorkflowConstants.PROP_INITIATOR);
+
+            // Extracting the properties from the initiatornode should be done in correct tennant or as administrator, since we don't
+            // know who started the workflow yet (We can't access node-properties when no valid authentication context is set up).
+            if (tenantToRunIn != null)
+            {
+                userName = TenantUtil.runAsTenant(new TenantUtil.TenantRunAsWork<String>()
                 {
-                    return getInitiator(initiatorNode);
-                }
-            }, tenantToRunIn);
-        }
-        else
-        {
-            // No tenant on worklfow, run as admin in default tenant
-            userName = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<String>()
+                    @Override public String doWork() throws Exception
+                    {
+                        return getInitiator(initiatorNode);
+                    }
+                }, tenantToRunIn);
+            }
+            else
             {
-                @SuppressWarnings("synthetic-access") public String doWork() throws Exception
+                // No tenant on worklfow, run as admin in default tenant
+                userName = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<String>()
                 {
-                    return getInitiator(initiatorNode);
-                }
-            }, AuthenticationUtil.getSystemUserName());
-        }
+                    @SuppressWarnings("synthetic-access") public String doWork() throws Exception
+                    {
+                        return getInitiator(initiatorNode);
+                    }
+                }, AuthenticationUtil.getSystemUserName());
+            }
 
-        // Fall back to task assignee, if no initiator is found
-        if (userName == null)
-        {
-            // Only try getting active task, if execution timer is waiting on is a userTask
-            Task task = new TaskQueryImpl(commandContext).processInstanceId(execution.getProcessInstanceId()).executeSingleResult(commandContext);
-
-            if (task != null && task.getAssignee() != null)
+            // Fall back to task assignee, if no initiator is found
+            if (userName == null)
             {
-                userName = task.getAssignee();
+                // Only try getting active task, if execution timer is waiting on is a userTask
+                Task task = new TaskQueryImpl(commandContext).processInstanceId(execution.getProcessInstanceId()).executeSingleResult(commandContext);
+
+                if (task != null && task.getAssignee() != null)
+                {
+                    userName = task.getAssignee();
+                }
+            }
+
+            // When no task assignee is set, nor the initiator, use system user to run job
+            if (userName == null)
+            {
+                userName = AuthenticationUtil.getSystemUserName();
+                tenantToRunIn = null;
+            }
+
+            if (tenantToRunIn != null)
+            {
+                TenantUtil.runAsUserTenant(new TenantUtil.TenantRunAsWork<Void>()
+                {
+                    @Override public Void doWork() throws Exception
+                    {
+                        superRun();
+                        return null;
+                    }
+                }, userName, tenantToRunIn);
+            }
+            else
+            {
+                // Execute the timer without tenant
+                AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Void>()
+                {
+                    @SuppressWarnings("synthetic-access") public Void doWork() throws Exception
+                    {
+                        superRun();
+                        return null;
+                    }
+                }, userName);
             }
         }
-
-        // When no task assignee is set, nor the initiator, use system user to run job
-        if (userName == null)
-        {
-            userName = AuthenticationUtil.getSystemUserName();
-            tenantToRunIn = null;
-        }
-
-        if (tenantToRunIn != null)
-        {
-            TenantUtil.runAsUserTenant(new TenantUtil.TenantRunAsWork<Void>()
-            {
-                @Override public Void doWork() throws Exception
-                {
-                    superRun();
-                    return null;
-                }
-            }, userName, tenantToRunIn);
-        }
         else
         {
-            // Execute the timer without tenant
-            AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Void>()
-            {
-                @SuppressWarnings("synthetic-access") public Void doWork() throws Exception
-                {
-                    superRun();
-                    return null;
-                }
-            }, userName);
+            superRun();
         }
 
     }
