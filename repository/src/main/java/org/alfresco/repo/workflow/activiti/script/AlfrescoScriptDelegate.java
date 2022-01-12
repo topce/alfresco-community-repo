@@ -47,13 +47,6 @@ public class AlfrescoScriptDelegate extends DelegateExecutionScriptBase implemen
     @Override
     public void execute(DelegateExecution execution)
     {
-        try
-        {
-            runScript(execution);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        runScript(execution);
     }
 }

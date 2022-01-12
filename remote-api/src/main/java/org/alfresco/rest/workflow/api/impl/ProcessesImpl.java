@@ -51,7 +51,6 @@ import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.activiti.engine.history.HistoricVariableInstance;
 import org.activiti.engine.impl.identity.Authentication;
-import org.activiti.engine.impl.util.ProcessDefinitionUtil;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -486,8 +485,8 @@ public class ProcessesImpl extends WorkflowRestImpl implements Processes
             {
                 if (definitionTypeMap.containsKey(processInfo.getProcessDefinitionId()) == false)
                 {
-                    ProcessDefinition processDefinition = ProcessDefinitionUtil.getProcessDefinition(processDefinitionId);
-                    Process process = ProcessDefinitionUtil.getBpmnModel(processDefinition.getId())
+                    ProcessDefinition processDefinition = activitiProcessEngine.getRepositoryService().getProcessDefinition(processDefinitionId);
+                    Process process = activitiProcessEngine.getRepositoryService().getBpmnModel(processDefinition.getId())
                                                                .getProcessById(processDefinition.getKey());
                     FlowElement startElement = process.getInitialFlowElement();
                     if (startElement instanceof StartEvent)
@@ -592,8 +591,8 @@ public class ProcessesImpl extends WorkflowRestImpl implements Processes
         
         Map<QName, Serializable> startParams = new HashMap<QName, Serializable>();
 
-        ProcessDefinition processDefinition = ProcessDefinitionUtil.getProcessDefinition(processDefinitionId);
-        Process processById = ProcessDefinitionUtil.getBpmnModel(processDefinition.getId())
+        ProcessDefinition processDefinition = activitiProcessEngine.getRepositoryService().getProcessDefinition(processDefinitionId);
+        Process processById = activitiProcessEngine.getRepositoryService().getBpmnModel(processDefinition.getId())
                                                    .getProcessById(processDefinition.getKey());
         FlowElement startElement = processById.getInitialFlowElement();
 
@@ -844,8 +843,8 @@ public class ProcessesImpl extends WorkflowRestImpl implements Processes
 
         // Get start-task definition for explicit typing of variables submitted at the start
         String formKey = null;
-        ProcessDefinition processDefinition = ProcessDefinitionUtil.getProcessDefinition(processDefinitionId);
-        Process process = ProcessDefinitionUtil.getBpmnModel(processDefinition.getId())
+        ProcessDefinition processDefinition = activitiProcessEngine.getRepositoryService().getProcessDefinition(processDefinitionId);
+        Process process = activitiProcessEngine.getRepositoryService().getBpmnModel(processDefinition.getId())
                                                .getProcessById(processDefinition.getKey());
         FlowElement startElement = process.getInitialFlowElement();
 
@@ -917,8 +916,8 @@ public class ProcessesImpl extends WorkflowRestImpl implements Processes
         // Get start-task definition for explicit typing of variables submitted at the start
         String formKey = null;
 
-        ProcessDefinition processDefinition = ProcessDefinitionUtil.getProcessDefinition(processDefinitionId);
-        Process process = ProcessDefinitionUtil.getBpmnModel(processDefinition.getId())
+        ProcessDefinition processDefinition = activitiProcessEngine.getRepositoryService().getProcessDefinition(processDefinitionId);
+        Process process = activitiProcessEngine.getRepositoryService().getBpmnModel(processDefinition.getId())
                                                .getProcessById(processDefinition.getKey());
         FlowElement startElement = process.getInitialFlowElement();
 

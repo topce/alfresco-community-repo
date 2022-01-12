@@ -56,7 +56,6 @@ import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
-import org.alfresco.repo.tenant.TenantService;
 import org.alfresco.repo.tenant.TenantUtil;
 import org.alfresco.repo.workflow.WorkflowObjectFactory;
 import org.alfresco.repo.workflow.activiti.properties.ActivitiPropertyConverter;
@@ -161,9 +160,6 @@ public class ActivitiTypeConverter
         int version = definition.getVersion();
         String defaultTitle = definition.getName();
 
-        if (activitiUtil.isMultiTenantWorkflowDeploymentEnabled() && !TenantUtil.isDefaultTenantName(defName)) {
-            defName = defName.substring(defName.lastIndexOf(TenantService.SEPARATOR) + 1);
-        }
 
         String startTaskName = null;
         Process process = repositoryService.getBpmnModel(defId)
