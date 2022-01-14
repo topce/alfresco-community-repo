@@ -292,9 +292,9 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
             if (processDefinitionKeyLike != null) query.processDefinitionKeyLike(processDefinitionKeyLike);
             if (processDefinitionName != null) query.processDefinitionName(processDefinitionName);
             if (processDefinitionNameLike != null) query.processDefinitionNameLike(processDefinitionNameLike);
-//            if (dueAt != null) query.dueDate(dueAt);
-//            if (dueAtGreaterThan != null) query.dueAfter(dueAtGreaterThan);
-//            if (dueAtLessThan != null) query.dueBefore(dueAtLessThan);
+            if (dueAt != null) query.taskDueDate(dueAt);
+            if (dueAtGreaterThan != null) query.taskDueAfter(dueAtGreaterThan);
+            if (dueAtLessThan != null) query.taskDueBefore(dueAtLessThan);
             if (startedAt != null) query.taskCreatedOn(startedAt);
             if (startedAtGreaterThan != null) query.taskCreatedAfter(startedAtGreaterThan);
             if (startedAtLessThan != null) query.taskCreatedBefore(startedAtLessThan);
@@ -1502,7 +1502,7 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
                 }
                 else if ("dueAt".equalsIgnoreCase(sortColumn.column))
                 {
-//                    query.orderByDueDate();
+                    query.orderByTaskDueDate();
                 }
             }
             else
@@ -1522,7 +1522,7 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
         }
         else
         {
-//            query.orderByDueDate().asc();
+            query.orderByTaskDueDate().asc();
         }
     }
     
