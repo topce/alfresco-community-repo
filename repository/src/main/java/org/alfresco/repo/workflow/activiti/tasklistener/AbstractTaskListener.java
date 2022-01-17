@@ -57,5 +57,5 @@ public abstract class AbstractTaskListener extends AbstractLifecycleBean
 
     }
 
-    abstract String beanRegistryKey();
+    protected abstract String beanRegistryKey();
 }

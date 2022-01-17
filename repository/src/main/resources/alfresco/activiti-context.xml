@@ -243,6 +243,7 @@
     <bean id="activitiProcessCreateListener" class="org.alfresco.repo.workflow.activiti.listener.ProcessStartExecutionListener">
       <property name="tenantService" ref="tenantService" />
       <property name="deployWorkflowsInTenant" value="${system.workflow.deployWorkflowsInTenant}" />
+      <property name="activitiBeanRegistry" ref="activitiBeanRegistry" />
     </bean>
 
     <bean id="activitiRepositoryService" factory-bean="activitiProcessEngine"
