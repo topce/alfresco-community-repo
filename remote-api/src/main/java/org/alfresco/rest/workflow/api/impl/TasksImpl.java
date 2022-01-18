@@ -354,7 +354,7 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
             for (org.activiti.engine.task.Task taskInstance : tasks)
             {
                 Task task = new Task(taskInstance);
-                task.setFormResourceKey(getFormResourceKey(taskInstance));
+                task.setFormResourceKey(taskInstance.getFormKey());
                 if ((includeProcessVariables != null && includeProcessVariables) || (includeTaskVariables != null && includeTaskVariables))
                 {
                     addVariables(task, includeProcessVariables, includeTaskVariables, taskInstance.getProcessVariables(),
@@ -661,7 +661,7 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
             for (org.activiti.engine.task.Task taskInstance : tasks)
             {
                 Task task = new Task(taskInstance);
-                task.setFormResourceKey(getFormResourceKey(taskInstance));
+                task.setFormResourceKey(taskInstance.getFormKey());
                 page.add(task);
             }
         }
@@ -908,6 +908,11 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
                     case UNCLAIMED:
                         activitiProcessEngine.getTaskService().setAssignee(taskId, null);
                         break;
+                }
+                org.activiti.engine.task.Task fetchedTask = activitiProcessEngine.getTaskService().createTaskQuery().taskId(taskId).singleResult();
+                if (fetchedTask != null)
+                {
+                    activitiProcessEngine.getTaskService().saveTask(fetchedTask);
                 }
             }
         }
@@ -1253,31 +1258,6 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
             throw new UnsupportedResourceOperationException("Task is not part of process, no items available.");
         }
         return getItemsFromProcess(task.getProcessInstanceId(), paging);
-    }
-
-    protected String getFormResourceKey(final org.activiti.engine.task.Task task)
-    {
-        if (task.getProcessDefinitionId() != null)
-        {
-            ProcessDefinition processDefinition = activitiProcessEngine.getRepositoryService().getProcessDefinition(task.getProcessDefinitionId());
-            Process process = activitiProcessEngine.getRepositoryService().getBpmnModel(processDefinition.getId())
-                        .getProcessById(processDefinition.getKey());
-            FlowElement startElement = process.getInitialFlowElement();
-            if (startElement instanceof StartEvent)
-            {
-                StartEvent startEvent = (StartEvent) startElement;
-                return startEvent.getFormKey();
-            }
-            else
-            {
-                return null;
-            }
-        }
-        else
-        {
-            // Standalone task, no form key available
-            return null;
-        }
     }
 
     /**
