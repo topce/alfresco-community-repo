@@ -1078,9 +1078,18 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
         if (taskVariable.getVariableScope() == VariableScope.GLOBAL)
         {
             // Get start-task definition for explicit typing of variables submitted at the start
-            String formKey = taskInstance.getFormKey();
+            TypeDefinition startTaskTypeDefinition = null;
+            ProcessDefinition processDefinition = activitiProcessEngine.getRepositoryService()
+                        .getProcessDefinition(taskInstance.getProcessDefinitionId());
+            Process process = activitiProcessEngine.getRepositoryService().getBpmnModel(processDefinition.getId())
+                        .getProcessById(processDefinition.getKey());
+            FlowElement startElement = process.getInitialFlowElement();
+            if (startElement instanceof StartEvent)
+            {
+                StartEvent startEvent = (StartEvent) startElement;
+                startTaskTypeDefinition = getWorkflowFactory().getTaskFullTypeDefinition(startEvent.getFormKey(), true);
 
-            TypeDefinition startTaskTypeDefinition = getWorkflowFactory().getTaskFullTypeDefinition(formKey, true);
+            }
             context = new TypeDefinitionContext(startTaskTypeDefinition, getQNameConverter());
             if (context.getPropertyDefinition(taskVariable.getName()) != null)
             {
