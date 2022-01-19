@@ -63,21 +63,21 @@ public class AlfrescoCallActivityBpmnParseHandler extends AbstractBpmnParseHandl
     {
         return CallActivity.class;
     }
-    
+
     protected void executeParse(BpmnParse bpmnParse, CallActivity callActivity)
     {
-        if (multiTenancyEnabled && tenantService.isEnabled())
-        {
-            ActivityBehavior activityBehavior = (ActivityBehavior) callActivity.getBehavior();
-
-            if(activityBehavior instanceof CallActivityBehavior)
-            {
-                CallActivityBehavior callActivityBehavior = (CallActivityBehavior) activityBehavior;
-                
-                // Make name of process-definition to be called aware of the current tenant
-                callActivityBehavior.setProcessDefinitonKey(tenantService.getName(callActivityBehavior.getProcessDefinitonKey()));
-            }
-        }
+//        if (multiTenancyEnabled && tenantService.isEnabled())
+//        {
+//            ActivityBehavior activityBehavior = (ActivityBehavior) callActivity.getBehavior();
+//
+//            if(activityBehavior instanceof CallActivityBehavior)
+//            {
+//                CallActivityBehavior callActivityBehavior = (CallActivityBehavior) activityBehavior;
+//
+//                // Make name of process-definition to be called aware of the current tenant
+//                callActivityBehavior.setProcessDefinitonKey(tenantService.getName(callActivityBehavior.getProcessDefinitonKey()));
+//            }
+//        }
     }
     
     /**
