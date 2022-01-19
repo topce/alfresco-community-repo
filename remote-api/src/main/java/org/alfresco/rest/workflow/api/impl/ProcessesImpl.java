@@ -485,7 +485,7 @@ public class ProcessesImpl extends WorkflowRestImpl implements Processes
             {
                 if (definitionTypeMap.containsKey(processInfo.getProcessDefinitionId()) == false)
                 {
-                    ProcessDefinition processDefinition = activitiProcessEngine.getRepositoryService().getProcessDefinition(processDefinitionId);
+                    ProcessDefinition processDefinition = activitiProcessEngine.getRepositoryService().getProcessDefinition(processInfo.getProcessDefinitionId());
                     Process process = activitiProcessEngine.getRepositoryService().getBpmnModel(processDefinition.getId())
                                                                .getProcessById(processDefinition.getKey());
                     FlowElement startElement = process.getInitialFlowElement();
