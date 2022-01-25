@@ -1,8 +1,8 @@
 insert into ACT_GE_PROPERTY
-values ('schema.version', '7.1.0-M6', 1);
+values ('schema.version', '7.1.0-M16', 1);
 
 insert into ACT_GE_PROPERTY
-values ('schema.history', 'create(7.1.0-M6)', 1);
+values ('schema.history', 'create(7.1.0-M16)', 1);
 
 alter table ACT_RE_DEPLOYMENT add KEY_ varchar(255);
 alter table ACT_RE_DEPLOYMENT add ENGINE_VERSION_ varchar(255);
