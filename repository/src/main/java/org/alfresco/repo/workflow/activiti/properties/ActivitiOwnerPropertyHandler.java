@@ -4,21 +4,21 @@
  * %%
  * Copyright (C) 2005 - 2016 Alfresco Software Limited
  * %%
- * This file is part of the Alfresco software. 
- * If the software was purchased under a paid Alfresco license, the terms of 
- * the paid license agreement will prevail.  Otherwise, the software is 
+ * This file is part of the Alfresco software.
+ * If the software was purchased under a paid Alfresco license, the terms of
+ * the paid license agreement will prevail.  Otherwise, the software is
  * provided under the following open source license terms:
- * 
+ *
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Alfresco is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -29,6 +29,8 @@ package org.alfresco.repo.workflow.activiti.properties;
 import java.io.Serializable;
 
 import org.activiti.engine.delegate.DelegateTask;
+import org.activiti.engine.impl.context.Context;
+import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.task.Task;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.workflow.activiti.ActivitiTaskPropertyHandler;
@@ -42,10 +44,9 @@ import org.alfresco.service.namespace.QName;
 public class ActivitiOwnerPropertyHandler extends ActivitiTaskPropertyHandler
 {
     /**
-    * {@inheritDoc}
-    */
-    @Override
-    protected Object handleTaskProperty(Task task, TypeDefinition type, QName key, Serializable value)
+     * {@inheritDoc}
+     */
+    @Override protected Object handleTaskProperty(Task task, TypeDefinition type, QName key, Serializable value)
     {
         //Task assignment needs to be done after setting all properties
         // so it is handled in ActivitiPropertyConverter.
@@ -53,10 +54,9 @@ public class ActivitiOwnerPropertyHandler extends ActivitiTaskPropertyHandler
     }
 
     /**
-    * {@inheritDoc}
-    */
-    @Override
-    protected Object handleDelegateTaskProperty(DelegateTask task, TypeDefinition type, QName key, Serializable value)
+     * {@inheritDoc}
+     */
+    @Override protected Object handleDelegateTaskProperty(DelegateTask task, TypeDefinition type, QName key, Serializable value)
     {
         checkType(key, value, String.class);
         String assignee = (String) value;
@@ -66,15 +66,19 @@ public class ActivitiOwnerPropertyHandler extends ActivitiTaskPropertyHandler
         if (currentAssignee == null || !currentAssignee.equals(assignee))
         {
             task.setAssignee(assignee);
+            CommandContext commandContext = Context.getCommandContext();
+            if (commandContext != null)
+            {
+                commandContext.getHistoryManager().recordTaskAssigneeChange(task.getId(), assignee);
+            }
         }
         return DO_NOT_ADD;
     }
 
     /**
-    * {@inheritDoc}
-    */
-    @Override
-    protected QName getKey()
+     * {@inheritDoc}
+     */
+    @Override protected QName getKey()
     {
         return ContentModel.PROP_OWNER;
     }
