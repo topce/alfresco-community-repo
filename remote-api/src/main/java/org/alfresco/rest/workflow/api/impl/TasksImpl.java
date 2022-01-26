@@ -909,12 +909,13 @@ public class TasksImpl extends WorkflowRestImpl implements Tasks
                         activitiProcessEngine.getTaskService().setAssignee(taskId, null);
                         break;
                 }
-                org.activiti.engine.task.Task fetchedTask = activitiProcessEngine.getTaskService().createTaskQuery().taskId(taskId).singleResult();
-                if (fetchedTask != null)
-                {
-                    activitiProcessEngine.getTaskService().saveTask(fetchedTask);
-                }
+
             }
+        }
+        org.activiti.engine.task.Task fetchedTask = activitiProcessEngine.getTaskService().createTaskQuery().taskId(taskId).singleResult();
+        if (fetchedTask != null)
+        {
+            activitiProcessEngine.getTaskService().saveTask(fetchedTask);
         }
 
         Task responseTask = new Task(activitiProcessEngine.getHistoryService().createHistoricTaskInstanceQuery().taskId(taskId).singleResult());
