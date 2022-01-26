@@ -1,6 +1,6 @@
 update ACT_GE_PROPERTY set VALUE_ = '7.1.0-M16' where NAME_ = 'schema.version';
 
-update ACT_GE_PROPERTY set VALUE_ = '7.1.0-M16' where NAME_ = 'schema.version';
+update ACT_GE_PROPERTY set VALUE_ = '7.1.0-M16' where NAME_ = 'schema.history';
 
 alter table ACT_RE_DEPLOYMENT add column VERSION_ int default 1;
 alter table ACT_RE_DEPLOYMENT add column PROJECT_RELEASE_VERSION_ nvarchar(255);
@@ -101,6 +101,16 @@ create table ACT_RU_DEADLETTER_JOB (
     primary key (ID_)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;
 
+create table ACT_RU_INTEGRATION (
+    ID_ varchar(64) not null,
+    EXECUTION_ID_ varchar(64),
+    PROCESS_INSTANCE_ID_ varchar(64),
+    PROC_DEF_ID_ varchar(64),
+    FLOW_NODE_ID_ varchar(64),
+    CREATED_DATE_ timestamp,
+    primary key (ID_)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;
+
 alter table ACT_RU_JOB
     add constraint ACT_FK_JOB_EXECUTION
         foreign key (EXECUTION_ID_)
@@ -176,6 +186,22 @@ alter table ACT_RU_DEADLETTER_JOB
         foreign key (EXCEPTION_STACK_ID_)
             references ACT_GE_BYTEARRAY (ID_);
 
+alter table ACT_RU_INTEGRATION
+    add constraint ACT_FK_INT_EXECUTION
+        foreign key (EXECUTION_ID_)
+            references ACT_RU_EXECUTION (ID_)
+            on delete cascade;
+
+alter table ACT_RU_INTEGRATION
+    add constraint ACT_FK_INT_PROC_INST
+        foreign key (PROCESS_INSTANCE_ID_)
+            references ACT_RU_EXECUTION (ID_);
+
+alter table ACT_RU_INTEGRATION
+    add constraint ACT_FK_INT_PROC_DEF
+        foreign key (PROC_DEF_ID_)
+            references ACT_RE_PROCDEF (ID_);
+
 
 INSERT INTO ACT_RU_DEADLETTER_JOB (ID_, REV_, TYPE_, EXCLUSIVE_, EXECUTION_ID_, PROCESS_INSTANCE_ID_, PROC_DEF_ID_,
                                    EXCEPTION_STACK_ID_,     EXCEPTION_MSG_, DUEDATE_, REPEAT_, HANDLER_TYPE_, HANDLER_CFG_, TENANT_ID_)
@@ -215,4 +241,3 @@ WHERE (HANDLER_TYPE_ = 'activate-processdefinition'
 
 
 update ACT_RU_EVENT_SUBSCR set PROC_DEF_ID_ = CONFIGURATION_ where EVENT_TYPE_ = 'message' and PROC_INST_ID_ is null and EXECUTION_ID_ is null and PROC_DEF_ID_ is null;
-
