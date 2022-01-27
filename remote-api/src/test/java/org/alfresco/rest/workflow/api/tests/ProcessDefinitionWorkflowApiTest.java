@@ -437,18 +437,9 @@ public class ProcessDefinitionWorkflowApiTest extends EnterpriseWorkflowTestApi
                 .singleResult();
 
         assertNotNull(activitiDefinition);
-        try
-        {
-            HttpResponse response = processDefinitionsClient.findImageById(activitiDefinition.getId());
-            fail("Exception expected");
-        }
-        catch(PublicApiException expected)
-        {
-            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), expected.getHttpResponse().getStatusCode());
-            assertTrue(expected.getMessage().contains("No image available"));
-        }
 
-
+        HttpResponse response = processDefinitionsClient.findImageById(activitiDefinition.getId());
+        assertEquals(HttpStatus.OK.value(), response.getStatusCode());
     }
 
     @Test
