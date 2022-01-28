@@ -25,6 +25,8 @@ alter table ACT_RU_EXECUTION add column START_USER_ID_ varchar(255);
 alter table ACT_RU_EXECUTION add column IS_MI_ROOT_ TINYINT;
 alter table ACT_RU_EXECUTION add column ROOT_PROC_INST_ID_ varchar(64);
 
+alter table ACT_HI_ACTINST add column DELETE_REASON_ varchar(4000);
+
 create index ACT_IDC_EXEC_ROOT on ACT_RU_EXECUTION(ROOT_PROC_INST_ID_);
 
 alter table ACT_RU_EXECUTION drop foreign key ACT_FK_EXE_PARENT;
@@ -241,3 +243,4 @@ WHERE (HANDLER_TYPE_ = 'activate-processdefinition'
 
 
 update ACT_RU_EVENT_SUBSCR set PROC_DEF_ID_ = CONFIGURATION_ where EVENT_TYPE_ = 'message' and PROC_INST_ID_ is null and EXECUTION_ID_ is null and PROC_DEF_ID_ is null;
+
