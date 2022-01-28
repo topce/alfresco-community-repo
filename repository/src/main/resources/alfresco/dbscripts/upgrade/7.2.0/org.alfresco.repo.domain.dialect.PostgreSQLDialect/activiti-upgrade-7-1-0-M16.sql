@@ -1,8 +1,5 @@
-insert into ACT_GE_PROPERTY
-values ('schema.version', '7.1.0-M6', 1);
-
-insert into ACT_GE_PROPERTY
-values ('schema.history', 'create(7.1.0-M6)', 1);
+update ACT_GE_PROPERTY set VALUE_ = '7.1.0-M6' where NAME_ = 'schema.version';
+update ACT_GE_PROPERTY set VALUE_ = 'create(7.1.0-M6)' where NAME_ = 'schema.history';
 
 alter table ACT_RE_DEPLOYMENT add KEY_ varchar(255);
 alter table ACT_RE_DEPLOYMENT add ENGINE_VERSION_ varchar(255);
@@ -11,10 +8,10 @@ alter table ACT_RE_DEPLOYMENT add PROJECT_RELEASE_VERSION_ varchar(255);
 
 
 alter table ACT_RU_EXECUTION add ROOT_PROC_INST_ID_ varchar(64);
-alter table ACT_RU_EXECUTION add IS_MI_ROOT_ smallint check(IS_MI_ROOT_ in (1,0));
+alter table ACT_RU_EXECUTION add IS_MI_ROOT_ boolean;
 alter table ACT_RU_EXECUTION add START_TIME_ timestamp;
 alter table ACT_RU_EXECUTION add START_USER_ID_ varchar(255);
-alter table ACT_RU_EXECUTION add IS_COUNT_ENABLED_ smallint check(IS_COUNT_ENABLED_ in (1,0));
+alter table ACT_RU_EXECUTION add IS_COUNT_ENABLED_ boolean;
 alter table ACT_RU_EXECUTION add EVT_SUBSCR_COUNT_ integer;
 alter table ACT_RU_EXECUTION add TASK_COUNT_ integer;
 alter table ACT_RU_EXECUTION add JOB_COUNT_ integer;
@@ -207,6 +204,15 @@ alter table ACT_RU_INTEGRATION
     add constraint ACT_FK_INT_PROC_DEF
     foreign key (PROC_DEF_ID_)
     references ACT_RE_PROCDEF (ID_);
+
+alter table ACT_HI_ACTINST add DELETE_REASON_ varchar(4000);
+
+drop table IF exists ACT_ID_GROUP cascade;
+drop table IF exists ACT_ID_INFO cascade;
+drop table IF exists ACT_ID_MEMBERSHIP cascade;
+drop table IF exists ACT_ID_USER cascade;
+
+
 --
 -- Record script finish
 --
