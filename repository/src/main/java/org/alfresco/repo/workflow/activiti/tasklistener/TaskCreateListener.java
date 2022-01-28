@@ -28,7 +28,6 @@ package org.alfresco.repo.workflow.activiti.tasklistener;
 
 import org.activiti.engine.delegate.DelegateTask;
 import org.activiti.engine.delegate.TaskListener;
-import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.task.IdentityLinkType;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.workflow.WorkflowConstants;

@@ -37,7 +37,7 @@ public class GetProcessDefinitionsSanityTests extends RestTest
         processDefinitions.getProcessDefinitionByDeploymentId("1").assertThat()
                 .field("name").is("Adhoc Activiti Process").and()
                 .field("description").is("Assign a new task to yourself or a colleague").and()
-                .field("id").is("activitiAdhoc:1:4").and()
+                .field("id").is("activitiAdhoc:1:3").and()
                 .field("startFormResourceKey").is("wf:submitAdhocTask").and()
                 .field("category").is("http://alfresco.org").and()
                 .field("title").is("New Task").and()
