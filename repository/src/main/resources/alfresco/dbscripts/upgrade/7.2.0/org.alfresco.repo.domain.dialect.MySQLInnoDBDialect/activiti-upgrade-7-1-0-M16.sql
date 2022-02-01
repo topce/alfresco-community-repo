@@ -1,6 +1,6 @@
-update ACT_GE_PROPERTY set VALUE_ = '7.1.0-M16' where NAME_ = 'schema.version';
+update ACT_GE_PROPERTY set VALUE_ = '7.1.0-M6' where NAME_ = 'schema.version';
 
-update ACT_GE_PROPERTY set VALUE_ = '7.1.0-M16' where NAME_ = 'schema.history';
+update ACT_GE_PROPERTY set VALUE_ = '7.1.0-M6' where NAME_ = 'schema.history';
 
 alter table ACT_RE_DEPLOYMENT add column VERSION_ int default 1;
 alter table ACT_RE_DEPLOYMENT add column PROJECT_RELEASE_VERSION_ nvarchar(255);
@@ -244,3 +244,14 @@ WHERE (HANDLER_TYPE_ = 'activate-processdefinition'
 
 update ACT_RU_EVENT_SUBSCR set PROC_DEF_ID_ = CONFIGURATION_ where EVENT_TYPE_ = 'message' and PROC_INST_ID_ is null and EXECUTION_ID_ is null and PROC_DEF_ID_ is null;
 
+--
+-- Record script finish
+--
+DELETE FROM alf_applied_patch WHERE id = 'patch.db-V7.2-activiti-upgrade-7-1-0-M16';
+INSERT INTO alf_applied_patch
+(id, description, fixes_from_schema, fixes_to_schema, applied_to_schema, target_schema, applied_on_date, applied_to_server, was_executed, succeeded, report)
+VALUES
+    (
+        'patch.db-V7.2-activiti-upgrade-7-1-0-M16', 'Manually executed script upgrade patch.db-V7.2-activiti-upgrade-7-1-0-M16',
+        0, 16000, -1, 16001, null, 'UNKNOWN', ${TRUE}, ${TRUE}, 'Script completed'
+    );
