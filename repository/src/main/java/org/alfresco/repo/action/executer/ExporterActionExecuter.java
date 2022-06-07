@@ -140,11 +140,14 @@ public class ExporterActionExecuter extends ActionExecuterAbstractBase
     public void executeImpl(Action ruleAction, NodeRef actionedUponNodeRef)
     {
         File zipFile = null;
+        File dataFile = null;
+        File contentDir = null;
         try
         {
             String packageName = (String)ruleAction.getParameterValue(PARAM_PACKAGE_NAME);
-            File dataFile = new File(packageName);
-            File contentDir = new File(packageName);
+
+            dataFile = new File(packageName);
+            contentDir = new File(packageName);
            
             // create a temporary file to hold the zip
             zipFile = TempFileProvider.createTempFile(TEMP_FILE_PREFIX, ACPExportPackageHandler.ACP_EXTENSION);
@@ -190,6 +193,8 @@ public class ExporterActionExecuter extends ActionExecuterAbstractBase
            // try and delete the temporary file
            if (zipFile != null)
            {
+               dataFile.delete();
+               contentDir.delete();
               zipFile.delete();
            }
         }
