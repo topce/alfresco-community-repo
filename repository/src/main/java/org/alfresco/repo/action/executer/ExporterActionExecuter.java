@@ -146,8 +146,8 @@ public class ExporterActionExecuter extends ActionExecuterAbstractBase
         {
             String packageName = (String)ruleAction.getParameterValue(PARAM_PACKAGE_NAME);
 
-            dataFile = new File(packageName);
-            contentDir = new File(packageName);
+            dataFile = TempFileProvider.createTempFile(packageName, "");
+            contentDir = TempFileProvider.createTempFile(packageName, "");
            
             // create a temporary file to hold the zip
             zipFile = TempFileProvider.createTempFile(TEMP_FILE_PREFIX, ACPExportPackageHandler.ACP_EXTENSION);
