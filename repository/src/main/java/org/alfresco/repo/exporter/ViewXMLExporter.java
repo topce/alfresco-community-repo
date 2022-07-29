@@ -50,6 +50,8 @@ import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
@@ -129,8 +131,8 @@ import org.xml.sax.helpers.AttributesImpl;
     
     // Configuration
     private ReferenceType referenceType;
-    
-    
+
+    private static Log logger = LogFactory.getLog(ViewXMLExporter.class);
 
     /**
      * Construct
@@ -926,6 +928,8 @@ import org.xml.sax.helpers.AttributesImpl;
      */
     private Path createIndexedPath(NodeRef nodeRef, Path path)
     {
+        logger.debug("MNT-23087 - ViewXMLExporter - createIndexedPath - " + nodeRef.toString() + " - " + path.toString());
+
         // Add indexes for same name siblings
         // TODO: Look at more efficient approach
         for (int i = path.size() - 1; i >= 0; i--)
@@ -952,7 +956,9 @@ import org.xml.sax.helpers.AttributesImpl;
                 }
             }
         }
-        
+
+        logger.debug("MNT-23087 - ViewXMLExporter - createIndexedPath - " + nodeRef.toString() + " - END");
+
         return path;
     }
 }

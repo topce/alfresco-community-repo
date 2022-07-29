@@ -141,6 +141,8 @@ public class ExportPost extends StreamACP
                 params.setExcludeAspects(excludedAspects);
             }
 
+            logger.debug("MNT-23087 - Creating ACP");
+
             // create an ACP of the nodes
             tempACPFile = createACP(params,
                         transferFormat ? ZIP_EXTENSION : ACPExportPackageHandler.ACP_EXTENSION,

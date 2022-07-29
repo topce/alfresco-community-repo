@@ -77,6 +77,8 @@ import org.alfresco.service.descriptor.DescriptorService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.springframework.extensions.surf.util.ParameterCheck;
@@ -104,8 +106,9 @@ public class ExporterComponent
     /** Indent Size */
     private int indentSize = 2;
     private boolean exportSecondaryNodes = false;
-    
-    
+
+    private static Log logger = LogFactory.getLog(ExporterComponent.class);
+
     /**
      * @param nodeService  the node service
      */
@@ -200,6 +203,8 @@ public class ExporterComponent
     {
         ParameterCheck.mandatory("Stream Handler", exportHandler);
 
+        logger.debug("MNT-23087 - ExporterComponent - exportView");
+
         // create exporter around export handler
         exportHandler.startExport();
         OutputStream dataFile = exportHandler.createDataStream();
@@ -208,7 +213,9 @@ public class ExporterComponent
 
         // export        
         exportView(urlExporter, parameters, progress);
-        
+
+        logger.debug("MNT-23087 - ExporterComponent - exportView - END");
+
         // end export
         exportHandler.endExport();
     }
@@ -275,6 +282,9 @@ public class ExporterComponent
          */
         public void export(ExporterCrawlerParameters parameters, Exporter exporter)
         {
+
+            logger.debug("MNT-23087 - ExporterComponent - export - START");
+
             // Initialise Crawler
             context = new ExporterContextImpl(parameters);
             exporter.start(context);
@@ -287,6 +297,9 @@ public class ExporterComponent
             {
                 // determine if root repository node
                 NodeRef nodeRef = context.getExportOf();
+
+                logger.debug("MNT-23087 - ExporterComponent - export - root node - NodeRef - " + nodeRef.toString());
+
                 if (parameters.isCrawlSelf())
                 {
                     // export root node of specified export location
@@ -309,6 +322,8 @@ public class ExporterComponent
 
                 context.setNextValue();
             }
+
+            logger.debug("MNT-23087 - ExporterComponent - export - start associations");
 
             //
             // Export associations between nodes
@@ -347,6 +362,8 @@ public class ExporterComponent
                 context.setNextValue();
             }
 
+            logger.debug("MNT-23087 - ExporterComponent - export - END associations");
+
             exporter.end();
         }
         
@@ -355,6 +372,8 @@ public class ExporterComponent
          */
         private void walkStartNamespaces(ExporterCrawlerParameters parameters, Exporter exporter)
         {
+            logger.debug("MNT-23087 - ExporterComponent - walkStartNamespaces - START");
+
             Collection<String> prefixes = namespaceService.getPrefixes();
             for (String prefix : prefixes)
             {
@@ -371,6 +390,8 @@ public class ExporterComponent
          */
         private void walkEndNamespaces(ExporterCrawlerParameters parameters, Exporter exporter)
         {
+            logger.debug("MNT-23087 - ExporterComponent - walkEndNamespaces - START");
+
             Collection<String> prefixes = namespaceService.getPrefixes();
             for (String prefix : prefixes)
             {
@@ -388,6 +409,8 @@ public class ExporterComponent
          */
         private void walkNode(NodeRef nodeRef, ExporterCrawlerParameters parameters, Exporter exporter, boolean exportAsRef)
         {
+            logger.debug("MNT-23087 - ExporterComponent - walkNode - START - " + nodeRef.toString());
+
             // Export node (but only if it's not excluded from export)
             QName type = nodeService.getType(nodeRef);
             if (isExcludedURI(parameters.getExcludeNamespaceURIs(), type.getNamespaceURI()))
@@ -600,6 +623,8 @@ public class ExporterComponent
             {
                 exporter.endNode(nodeRef);
             }
+
+            logger.debug("MNT-23087 - ExporterComponent - walkNode - END - " + nodeRef.toString());
         }
         
         /**
@@ -614,6 +639,9 @@ public class ExporterComponent
          */
         private void walkProperty(NodeRef nodeRef, QName property, Object value, int index, ExporterCrawlerParameters parameters, Exporter exporter)
         {
+            logger.debug("MNT-23087 - ExporterComponent - walkProperty - START - " + nodeRef.toString() + " - "
+                    + property.getLocalName());
+
             // determine data type of value
             PropertyDefinition propDef = dictionaryService.getProperty(property);
             DataTypeDefinition dataTypeDef = (propDef == null) ? null : propDef.getDataType();
@@ -684,6 +712,9 @@ public class ExporterComponent
                     }
                 }
             }
+
+            logger.debug("MNT-23087 - ExporterComponent - walkProperty - END - " + nodeRef.toString() + " - "
+                    + property.getLocalName());
         }
         
         /**
@@ -695,6 +726,8 @@ public class ExporterComponent
          */
         private void walkNodeSecondaryLinks(NodeRef nodeRef, ExporterCrawlerParameters parameters, Exporter exporter)
         {
+            logger.debug("MNT-23087 - ExporterComponent - walkNodeSecondaryLinks - START - " + nodeRef.toString());
+
             // sort associations into assoc type buckets filtering out unneccessary associations
             Map<QName, List<ChildAssociationRef>> assocTypes = new HashMap<QName, List<ChildAssociationRef>>();
             List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(nodeRef);
@@ -754,6 +787,8 @@ public class ExporterComponent
                 exporter.endAssocs(nodeRef);
                 exporter.endReference(nodeRef);
             }
+
+            logger.debug("MNT-23087 - ExporterComponent - walkNodeSecondaryLinks - END - " + nodeRef.toString());
         }
         
         /**
@@ -765,6 +800,8 @@ public class ExporterComponent
          */
         private void walkNodeAssociations(NodeRef nodeRef, ExporterCrawlerParameters parameters, Exporter exporter)
         {
+            logger.debug("MNT-23087 - ExporterComponent - walkNodeAssociations - START - " + nodeRef.toString());
+
             // sort associations into assoc type buckets filtering out unneccessary associations
             Map<QName, List<AssociationRef>> assocTypes = new HashMap<QName, List<AssociationRef>>();
             List<AssociationRef> assocs = nodeService.getTargetAssocs(nodeRef, RegexQNamePattern.MATCH_ALL);
@@ -811,6 +848,8 @@ public class ExporterComponent
                 exporter.endAssocs(nodeRef);
                 exporter.endReference(nodeRef);
             }
+
+            logger.debug("MNT-23087 - ExporterComponent - walkNodeAssociations - END - " + nodeRef.toString());
         }
 
         /**

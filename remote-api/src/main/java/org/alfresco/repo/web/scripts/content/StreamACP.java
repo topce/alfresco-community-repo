@@ -227,6 +227,13 @@ public class StreamACP extends StreamContent
             handler.setExportAsFolders(keepFolderStructure);
             handler.setNodeService(this.nodeService);
 
+            logger.debug("MNT-23087 - Created acp file: " + acpFile.getAbsolutePath());
+
+            for (NodeRef n : params.getExportFrom().getNodeRefs())
+            {
+                logger.debug("MNT-23087 - Location NodeRef: " + n.toString());
+            }
+
             // perform the actual export
             this.exporterService.exportView(handler, params, null);
             
