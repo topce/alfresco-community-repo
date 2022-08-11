@@ -182,6 +182,6 @@ public class QuickShareContentGet extends ContentGet implements ServletContextAw
         }
 
         // Stream the content
-        streamContentLocal(req, res, nodeRef, attach, propertyQName, model);
+        streamContent(req, res, nodeRef, propertyQName, attach, null, null);
 	}
 }
