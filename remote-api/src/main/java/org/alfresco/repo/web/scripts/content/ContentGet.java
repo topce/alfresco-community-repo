@@ -170,32 +170,6 @@ public class ContentGet extends StreamContent implements ServletContextAware
         }
 
         // Stream the content
-        streamContentLocal(req, res, nodeRef, attach, propertyQName, null);
-    }
-
-    protected void streamContentLocal(WebScriptRequest req, WebScriptResponse res, NodeRef nodeRef, boolean attach, QName propertyQName, Map<String, Object> model) throws IOException
-    {
-        streamContent(req, res, nodeRef, propertyQName, attach, null, model);
-        /*
-        String userAgent = req.getHeader("User-Agent");
-        userAgent = userAgent != null ? userAgent.toLowerCase() : "";
-        boolean rfc5987Supported = (userAgent.contains("msie") ||
-                userAgent.contains(" trident/") ||
-                userAgent.contains(" chrome/") ||
-                userAgent.contains(" firefox/") ||
-                userAgent.contains(" safari/"));
-
-        if (attach && rfc5987Supported)
-        {
-            String name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
-            
-            // maintain the original name of the node during the download - do not modify it - see MNT-16510
-            streamContent(req, res, nodeRef, propertyQName, attach, name, model);
-        }
-        else
-        {
-            streamContent(req, res, nodeRef, propertyQName, attach, null, model);
-        }
-        */
+        streamContent(req, res, nodeRef, propertyQName, attach, null, null);
     }
 }
