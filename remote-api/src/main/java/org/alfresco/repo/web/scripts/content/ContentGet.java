@@ -175,6 +175,8 @@ public class ContentGet extends StreamContent implements ServletContextAware
 
     protected void streamContentLocal(WebScriptRequest req, WebScriptResponse res, NodeRef nodeRef, boolean attach, QName propertyQName, Map<String, Object> model) throws IOException
     {
+        streamContent(req, res, nodeRef, propertyQName, attach, null, model);
+        /*
         String userAgent = req.getHeader("User-Agent");
         userAgent = userAgent != null ? userAgent.toLowerCase() : "";
         boolean rfc5987Supported = (userAgent.contains("msie") ||
@@ -194,5 +196,6 @@ public class ContentGet extends StreamContent implements ServletContextAware
         {
             streamContent(req, res, nodeRef, propertyQName, attach, null, model);
         }
+        */
     }
 }

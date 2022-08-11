@@ -47,7 +47,7 @@ public class MimeTypeUtil
     public static String determineMimetype(ContentReader reader, WebScriptRequest req, MimetypeService mimetypeService)
     {
         String mimetype = reader.getMimetype();
-        if (mimetype == null || mimetype.length() == 0)
+        if (mimetype == null || mimetype.length() == 0 || mimetype.equals(MimetypeMap.MIMETYPE_BINARY))
         {
             String extensionPath = req.getExtensionPath();
             mimetype = MimetypeMap.MIMETYPE_BINARY;
