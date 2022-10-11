@@ -108,7 +108,8 @@ public class RhinoScriptProcessor extends BaseProcessor implements ScriptProcess
     /** Cache of runtime compiled script instances */
     private final Map<String, Script> scriptCache = new ConcurrentHashMap<String, Script>(256);
     
-    
+    private final int OPTIMIZATION_LEVEL = -1;
+
     /**
      * Set the default store reference
      * 
@@ -182,6 +183,7 @@ public class RhinoScriptProcessor extends BaseProcessor implements ScriptProcess
                 Context cx = Context.enter();
                 try
                 {
+                    setOptimizationLevel(cx, "execute(ScriptLocation, Map)");
                     script = cx.compileString(source, location.toString(), 1, null);
                     
                     // We do not worry about more than one user thread compiling the same script.
@@ -250,6 +252,7 @@ public class RhinoScriptProcessor extends BaseProcessor implements ScriptProcess
             Context cx = Context.enter();
             try
             {
+                setOptimizationLevel(cx, "execute(NodeRef, QName, Map)");
                 script = cx.compileString(resolveScriptImports(cr.getContentString()), nodeRef.toString(), 1, null);
             }
             finally
@@ -285,6 +288,7 @@ public class RhinoScriptProcessor extends BaseProcessor implements ScriptProcess
             Context cx = Context.enter();
             try
             {
+                setOptimizationLevel(cx, "execute(String, Map, boolean)");
                 script = cx.compileString(resolveScriptImports(source), "AlfrescoJS", 1, null);
             }
             finally
@@ -460,12 +464,13 @@ public class RhinoScriptProcessor extends BaseProcessor implements ScriptProcess
         model = convertToRhinoModel(model);
         
         Context cx = Context.enter();
+        Scriptable scope;
         try
         {
             // Create a thread-specific scope from one of the shared scopes.
             // See http://www.mozilla.org/rhino/scopes.html
             cx.setWrapFactory(secure ? wrapFactory : sandboxFactory);
-            Scriptable scope;
+
             if (this.shareSealedScopes)
             {
                 Scriptable sharedScope = secure ? this.nonSecureScope : this.secureScope;
@@ -546,6 +551,9 @@ public class RhinoScriptProcessor extends BaseProcessor implements ScriptProcess
         }
         finally
         {
+            unset(model);
+            scope = null;
+
             Context.exit();
             
             if (callLogger.isDebugEnabled())
@@ -694,5 +702,51 @@ public class RhinoScriptProcessor extends BaseProcessor implements ScriptProcess
             scope = cx.initSafeStandardObjects(null, sealed);
         }
         return scope;
+    }
+
+    /**
+     * Changes the optimization level of Rhino context
+     *
+     * @param cx Rhino context
+     * @param prefix A partial message to identify who called the method
+     */
+    private void setOptimizationLevel(Context cx, String prefix)
+    {
+        String msg = (prefix != null ? prefix : "") + " - Setting context optimization level to " + OPTIMIZATION_LEVEL;
+
+        logger.info(msg);
+
+        if (cx != null)
+        {
+            cx.setOptimizationLevel(OPTIMIZATION_LEVEL);
+        }
+    }
+
+    /**
+     * Unsets the scope from any model instance where it has been injected before
+     *
+     * @param model
+     *            Data model containing objects used on script execution
+     */
+    private void unset(Map<String, Object> model)
+    {
+        if (model != null)
+        {
+            for (String key : model.keySet())
+            {
+                try
+                {
+                    Object obj = model.get(key);
+                    if (obj instanceof Scopeable)
+                    {
+                        ((Scopeable) obj).setScope(null);
+                    }
+                }
+                catch (Exception e)
+                {
+                    logger.info("Unable to unset scope from " + key + " : ", e);
+                }
+            }
+        }
     }
 }
