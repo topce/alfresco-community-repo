@@ -33,7 +33,7 @@ import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Scriptable;
 
 /**
- * Custom factory that allows to apply configured limites to script executions
+ * Custom factory that allows to apply configured limits to script executions
  * 
  * @see ContextFactory
  */
