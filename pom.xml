@@ -33,7 +33,7 @@
         <licenseName>community</licenseName>
 
         <build-number>local</build-number>
-        <image.tag>latest</image.tag>
+        <image.tag>multiArchTest</image.tag>
         <image.registry>quay.io</image.registry>
 
         <java.version>11</java.version>
