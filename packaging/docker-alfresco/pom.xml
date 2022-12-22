@@ -11,7 +11,7 @@
     </parent>
 
     <properties>
-        <image.name>alfresco/alfresco-community-repo-base</image.name>
+        <image.name>alfresco/dev/alfresco-community-repo-test</image.name>
     </properties>
 
     <build>
@@ -139,6 +139,15 @@
                             <images>
                                 <image>
                                     <name>${image.name}:${image.tag}</name>
+                                    <build>
+                                        <buildx>
+                                            <platforms>
+                                                <platform>linux/amd64</platform>
+                                                <platform>linux/arm64</platform>
+                                            </platforms>
+                                        </buildx>
+                                        <dockerFileDir>${project.basedir}</dockerFileDir>
+                                    </build>
                                 </image>
                             </images>
                         </configuration>
@@ -170,10 +179,15 @@
                                 <image>
                                     <name>${image.name}:${image.tag}</name>
                                     <registry>${image.registry}</registry>
-                                </image>
-                                <!-- DockerHub image -->
-                                <image>
-                                    <name>${image.name}:${image.tag}</name>
+                                    <build>
+                                        <buildx>
+                                            <platforms>
+                                                <platform>linux/amd64</platform>
+                                                <platform>linux/arm64</platform>
+                                            </platforms>
+                                        </buildx>
+                                        <dockerFileDir>${project.basedir}</dockerFileDir>
+                                    </build>
                                 </image>
                             </images>
                         </configuration>
