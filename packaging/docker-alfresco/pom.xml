@@ -11,7 +11,7 @@
     </parent>
 
     <properties>
-        <image.name>alfresco/dev/alfresco-community-repo-test</image.name>
+        <image.name>alfresco/dev</image.name>
     </properties>
 
     <build>
