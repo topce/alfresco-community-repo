@@ -11,7 +11,7 @@
     </parent>
 
     <properties>
-        <image.name>quay.io/alfresco/dev</image.name>
+        <image.name>alfresco/dev</image.name>
     </properties>
 
     <build>
@@ -177,7 +177,7 @@
                             <images>
                                 <!-- Quay image -->
                                 <image>
-                                    <name>${image.name}:multiArchTest</name>
+                                    <name>quay.io/${image.name}:multiArchTest</name>
                                     <registry>${image.registry}</registry>
                                     <build>
                                         <buildx>
