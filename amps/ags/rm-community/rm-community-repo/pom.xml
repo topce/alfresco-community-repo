@@ -566,40 +566,45 @@
           </build>
        </profile>
 
-       <profile>
-          <id>push-docker-images</id>
-          <!-- publishes "image:latest" on Quay & DockerHub -->
-          <build>
-             <plugins>
-                <plugin>
-                   <groupId>io.fabric8</groupId>
-                   <artifactId>docker-maven-plugin</artifactId>
-                   <configuration>
-                      <images>
-                         <image>
-                            <!-- Quay image -->
-                            <name>${image.name}:${image.tag}</name>
-                            <registry>${image.registry}</registry>
-                         </image>
-                         <image>
-                            <!-- DockerHub image -->
-                            <name>${image.name}:${image.tag}</name>
-                         </image>
-                      </images>
-                   </configuration>
-                   <executions>
-                      <execution>
-                         <id>build-push-image</id>
-                         <phase>install</phase>
-                         <goals>
-                            <goal>build</goal>
-                            <goal>push</goal>
-                         </goals>
-                      </execution>
-                   </executions>
-                </plugin>
-             </plugins>
-          </build>
-       </profile>
+<!--       <profile>-->
+<!--          <id>push-docker-images</id>-->
+<!--          &lt;!&ndash; publishes "image:latest" on Quay & DockerHub &ndash;&gt;-->
+<!--          <build>-->
+<!--             <plugins>-->
+<!--                <plugin>-->
+<!--                   <groupId>io.fabric8</groupId>-->
+<!--                   <artifactId>docker-maven-plugin</artifactId>-->
+<!--                   <configuration>-->
+<!--                      <images>-->
+<!--                         <image>-->
+<!--                            &lt;!&ndash; Quay image &ndash;&gt;-->
+<!--                            <name>${image.name}:${image.tag}</name>-->
+<!--                            <registry>${image.registry}</registry>-->
+<!--                             <build>-->
+<!--                                 <buildx>-->
+<!--                                     <platforms>-->
+<!--                                         <platform>linux/amd64</platform>-->
+<!--                                         <platform>linux/arm64</platform>-->
+<!--                                     </platforms>-->
+<!--                                 </buildx>-->
+<!--                                 <dockerFileDir>${project.basedir}</dockerFileDir>-->
+<!--                             </build>-->
+<!--                         </image>-->
+<!--                      </images>-->
+<!--                   </configuration>-->
+<!--                   <executions>-->
+<!--                      <execution>-->
+<!--                         <id>build-push-image</id>-->
+<!--                         <phase>install</phase>-->
+<!--                         <goals>-->
+<!--                            <goal>build</goal>-->
+<!--                            <goal>push</goal>-->
+<!--                         </goals>-->
+<!--                      </execution>-->
+<!--                   </executions>-->
+<!--                </plugin>-->
+<!--             </plugins>-->
+<!--          </build>-->
+<!--       </profile>-->
    </profiles>
 </project>

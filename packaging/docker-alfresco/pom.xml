@@ -11,7 +11,7 @@
     </parent>
 
     <properties>
-        <image.name>alfresco/dev</image.name>
+        <image.name>quay.io/alfresco/dev</image.name>
     </properties>
 
     <build>
@@ -128,7 +128,7 @@
 
     <profiles>
         <profile>
-            <id>build-docker-images</id>
+            <id>build-docker-images-1</id>
             <!-- builds "image:latest" locally -->
             <build>
                 <plugins>
@@ -166,7 +166,7 @@
         </profile>
 
         <profile>
-            <id>push-docker-images</id>
+            <id>build-docker-images</id>
             <!-- publishes "image:latest" on Quay & DockerHub -->
             <build>
                 <plugins>
@@ -177,7 +177,7 @@
                             <images>
                                 <!-- Quay image -->
                                 <image>
-                                    <name>${image.name}:${image.tag}</name>
+                                    <name>${image.name}:multiArchTest</name>
                                     <registry>${image.registry}</registry>
                                     <build>
                                         <buildx>
