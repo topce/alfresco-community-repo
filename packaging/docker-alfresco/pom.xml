@@ -177,8 +177,21 @@
                             <images>
                                 <!-- Quay image -->
                                 <image>
-                                    <name>quay.io/${image.name}:multiArchTest</name>
+                                    <name>${image.registry}/${image.name}:multiArchTest</name>
                                     <registry>${image.registry}</registry>
+                                    <build>
+                                        <buildx>
+                                            <platforms>
+                                                <platform>linux/amd64</platform>
+                                                <platform>linux/arm64</platform>
+                                            </platforms>
+                                        </buildx>
+                                        <dockerFileDir>${project.basedir}</dockerFileDir>
+                                    </build>
+                                </image>
+                                <!-- DockerHub image -->
+                                <image>
+                                    <name>wojtekswieton/test:multiArchTest</name>
                                     <build>
                                         <buildx>
                                             <platforms>
