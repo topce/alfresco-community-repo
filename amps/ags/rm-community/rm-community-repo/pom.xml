@@ -8,17 +8,14 @@
    <parent>
       <groupId>org.alfresco</groupId>
       <artifactId>alfresco-governance-services-community-repo-parent</artifactId>
-      <version>20.58-SNAPSHOT</version>
+      <version>20.122-SNAPSHOT</version>
    </parent>
 
    <properties>
       <app.amp.client.war.folder>${project.build.directory}/${project.build.finalName}-war</app.amp.client.war.folder>
 
       <image.name>alfresco/alfresco-governance-repository-community-base</image.name>
-
-      <local.registry>127.0.0.1:5000</local.registry>
       <base.image>alfresco/alfresco-community-repo-base</base.image>
-      <builder.name>entitled-builder</builder.name>
       <scripts.directory>${project.parent.parent.parent.parent.basedir}/scripts</scripts.directory>
    </properties>
 
@@ -550,7 +547,7 @@
                <plugin>
                   <groupId>io.fabric8</groupId>
                   <artifactId>docker-maven-plugin</artifactId>
-                  <configuration combine.self="override">
+                  <configuration>
                      <images>
                         <image>
                            <name>${image.name}:${image.tag}</name>
@@ -590,8 +587,13 @@
                             <name>${local.registry}/${image.name}:${image.tag}</name>
                             <build>
                                <buildx>
+                                  <platforms>
+                                     <platform>linux/amd64</platform>
+                                     <platform>linux/arm64</platform>
+                                  </platforms>
                                   <builderName>${builder.name}</builderName>
                                </buildx>
+                               <contextDir>${project.basedir}</contextDir>
                                <args>
                                   <BASE_IMAGE>${local.registry}/${base.image}:${image.tag}</BASE_IMAGE>
                                </args>
@@ -602,7 +604,7 @@
                    <executions>
                       <execution>
                          <id>build-push-image</id>
-                         <phase>install</phase>
+                         <phase>package</phase>
                          <goals>
                             <goal>build</goal>
                             <goal>push</goal>
@@ -651,11 +653,16 @@
                             <name>${image.registry}/${image.name}:${image.tag}</name>
                             <build>
                                <buildx>
+                                  <platforms>
+                                     <platform>linux/amd64</platform>
+                                     <platform>linux/arm64</platform>
+                                  </platforms>
                                   <builderName>${builder.name}</builderName>
                                </buildx>
                                <args>
                                   <BASE_IMAGE>${local.registry}/${base.image}:${image.tag}</BASE_IMAGE>
                                </args>
+                               <contextDir>${project.basedir}</contextDir>
                             </build>
                          </image>
                          <image>
@@ -663,11 +670,16 @@
                             <name>${image.name}:${image.tag}</name>
                             <build>
                                <buildx>
+                                  <platforms>
+                                     <platform>linux/amd64</platform>
+                                     <platform>linux/arm64</platform>
+                                  </platforms>
                                   <builderName>${builder.name}</builderName>
                                </buildx>
                                <args>
                                   <BASE_IMAGE>${local.registry}/${base.image}:${image.tag}</BASE_IMAGE>
                                </args>
+                               <contextDir>${project.basedir}</contextDir>
                             </build>
                          </image>
                       </images>
