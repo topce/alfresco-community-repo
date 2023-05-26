@@ -82,7 +82,7 @@ jobs:
         with:
           version: '6.55.0'
           rulesets: 'pmd-ruleset.xml'
-          #analyzeModifiedFilesOnly: true
+          analyzeModifiedFilesOnly: false
       - name: Fail build if there are PMD violations
         if: steps.pmd.outputs.violations != 0
         run: exit 1
