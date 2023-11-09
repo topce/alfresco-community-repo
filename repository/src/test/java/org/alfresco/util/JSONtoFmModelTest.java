@@ -25,6 +25,8 @@
  */
 package org.alfresco.util;
 
+import static org.alfresco.util.JSONtoFmModel.convertJSONObjectToMap;
+
 import java.io.File;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -34,6 +36,7 @@ import junit.framework.TestCase;
 import freemarker.template.Configuration;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.Template;
+import org.json.JSONException;
 
 /**
  * Test JSONtoFmModel conversion
@@ -44,6 +47,19 @@ import freemarker.template.Template;
  */
 public class JSONtoFmModelTest extends TestCase
 {
+
+    public void testCVE_2023_5072()
+    {
+        try {
+            // \0 after ,
+            String str = "{\"myKey\":true, \0\"myOtherKey\":false}";
+            assertNull("Expected an exception", convertJSONObjectToMap(str));
+        } catch (JSONException e) {
+            assertEquals("Expecting an exception message",
+                    "A JSONObject text must end with '}' at 15 [character 16 line 1]",
+                    e.getMessage());
+        }
+    }
 
     public void testUtil()
     {
@@ -160,7 +176,7 @@ public class JSONtoFmModelTest extends TestCase
             System.out.println("TEST 2");
             //System.out.println(test2_in);
             //System.out.println("--->");
-            root = JSONtoFmModel.convertJSONObjectToMap(test2_in);
+            root = convertJSONObjectToMap(test2_in);
             //System.out.println(JSONtoFmModel.toString(root));
             assertEquals(test2_expected_out, JSONtoFmModel.toString(root));
             
@@ -175,7 +191,7 @@ public class JSONtoFmModelTest extends TestCase
             System.out.println("TEST 3");
             //System.out.println(test3_in);
             //System.out.println("--->");
-            root = JSONtoFmModel.convertJSONObjectToMap(test3_in);
+            root = convertJSONObjectToMap(test3_in);
             //System.out.println(JSONtoFmModel.toString(root));
             assertEquals(test3_expected_out, JSONtoFmModel.toString(root));
             
@@ -188,7 +204,7 @@ public class JSONtoFmModelTest extends TestCase
             System.out.println("TEST 4");
             //System.out.println(test4_in);
             //System.out.println("--->");
-            root = JSONtoFmModel.convertJSONObjectToMap(test4_in);
+            root = convertJSONObjectToMap(test4_in);
             //System.out.println(JSONtoFmModel.toString(root));
             assertEquals(test4_expected_out, JSONtoFmModel.toString(root));
             
