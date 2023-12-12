@@ -163,6 +163,24 @@ public class SearchInFolderTests extends AbstractCmisE2ETest
     }
 
     @Test
+    public void executeCMISQuery_documentCreatedByIsNull()
+    {
+        String query = "SELECT * FROM cmis:document where IN_FOLDER('%s') AND cmis:createdBy IS NULL";
+        String currentQuery = String.format(query, parentFolder.getNodeRef());
+        cmisApi.authenticateUser(testUser);
+        waitForIndexing(currentQuery, 0);
+    }
+
+    @Test
+    public void executeCMISQuery_documentCreatedByIsNotNull()
+    {
+        String query = "SELECT * FROM cmis:document where IN_FOLDER('%s') AND cmis:createdBy IS NOT NULL";
+        String currentQuery = String.format(query, parentFolder.getNodeRef());
+        cmisApi.authenticateUser(testUser);
+        waitForIndexing(currentQuery, subFile1, subFile2, subFile3, subFile4, subFile5);
+    }
+
+    @Test
     public void executeCMISQuery_folderNameNotNull()
     {
         String query = "SELECT * FROM cmis:folder where IN_FOLDER('%s') AND cmis:name IS NOT NULL";

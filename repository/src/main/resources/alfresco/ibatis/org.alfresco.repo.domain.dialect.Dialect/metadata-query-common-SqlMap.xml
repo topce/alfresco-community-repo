@@ -129,7 +129,7 @@
                                     	${item.alias}.${item.fieldName} IS NOT NULL
                                 	</when>
                                 	<when test="item.type == 'NOTEXISTS'">
-                                    	${item.alias}.${item.fieldName} IS NOT NULL
+                                    	${item.alias}.${item.fieldName} IS NULL
                                 	</when>
                                 	<when test="item.type == 'GT'">
                                     	${item.fieldAndFunction} &gt; #{item.value}
