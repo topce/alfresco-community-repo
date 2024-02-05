@@ -470,5 +470,10 @@
    
    <!-- Cancel check out is granted to the lock owner                                   -->
    <globalPermission permission="CancelCheckOut" authority="ROLE_LOCK_OWNER"/>
+
+   <!-- ======================== -->
+   <!-- Global Circa permissions -->
+   <!-- ======================== -->
+   <globalPermission permission="FullControl" authority="ROLE_CIRCABC_LEADER"/>
    
 </permissions>

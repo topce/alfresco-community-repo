@@ -303,5 +303,9 @@
       <property name="sqlSessionTemplate" ref="repoSqlSessionTemplate"/>
       <property name="tenantEntityCache" ref="tenantEntityCache"/>
    </bean>
+
+   <bean id="circabcDAO" class="org.alfresco.repo.security.permissions.dynamic.ibatis.CircabcDAOImpl">
+      <property name="sqlSessionTemplate" ref="repoSqlSessionTemplate"/>
+   </bean>
    
 </beans>

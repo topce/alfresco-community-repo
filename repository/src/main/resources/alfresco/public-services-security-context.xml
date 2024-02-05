@@ -100,8 +100,9 @@
         </property>
         <property name="dynamicAuthorities">
             <list>
-                <ref bean="ownerDynamicAuthority" />
+                <ref bean="circabcOwnerDynamicAuthority" />
                 <ref bean="lockOwnerDynamicAuthority" />
+                <ref bean="circabcInterestGroupLeaderDynamicAuthority" />
             </list>
         </property>
         <property name="fixedAclUpdater">
@@ -145,6 +146,15 @@
                 <value>CancelCheckOut</value>
             </list>
         </property>
+    </bean>
+
+    <bean id="circabcOwnerDynamicAuthority" class="org.alfresco.repo.security.permissions.dynamic.CircabcOwnerDynamicAuthority">
+        <property name="ownableService" ref="ownableService" />
+        <property name="circabcService" ref="circabcDynamicAuthorityService" />
+    </bean>
+
+    <bean id="circabcInterestGroupLeaderDynamicAuthority" class="org.alfresco.repo.security.permissions.dynamic.CircabcInterestGroupLeaderDynamicAuthority">
+        <property name="circabcService" ref="circabcDynamicAuthorityService" />
     </bean>
 
     <!-- =========================== -->
