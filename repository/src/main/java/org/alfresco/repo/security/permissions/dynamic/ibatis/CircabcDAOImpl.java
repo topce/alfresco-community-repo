@@ -51,12 +51,12 @@ public class CircabcDAOImpl implements CircabcDAO {
     String groupNodeRef,
     String userName
   ) {
-    Map<String, Object> params = new HashMap<String, Object>(1);
+    Map<String, Object> params = new HashMap<String, Object>(2);
 
     params.put("nodeRef", groupNodeRef);
 
     params.put("userName", userName);
 
-    return template.selectOne(SELECT_GROUP_PERMISSION, params);
+    return template.selectList(SELECT_GROUP_PERMISSION, params);
   }
 }
